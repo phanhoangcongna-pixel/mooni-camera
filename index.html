@@ -10,55 +10,61 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <title>MOONI Camera</title>
 <style>
-:root{--bg:#f7f5f1;--ink:#282622;--muted:#9a968e;--line:#e8e4dc;--accent:#8caa9d}
+:root{--bg:#050505;--ink:#f7f6f2;--muted:#aaa8a2;--line:#343330;--accent:#d8d4ca}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased}
-.app{max-width:480px;min-height:100svh;margin:auto;padding:env(safe-area-inset-top) 20px calc(13px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
-header{text-align:center;padding:13px 0 17px}
-.logo{font:500 20px Georgia,serif;letter-spacing:.42em;padding-left:.42em}
-.tag{font:italic 10px Georgia,serif;color:#aaa49a;margin-top:5px;letter-spacing:.035em}
-.stage{position:relative;width:100%;aspect-ratio:3/4;max-height:none;overflow:hidden;border-radius:16px;background:#d5d4ce;box-shadow:0 5px 18px #25231d0c;transition:width .18s,aspect-ratio .18s}
+html,body{margin:0;min-height:100%;background:#050505;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased}
+body{overscroll-behavior:none}
+.app{width:100%;max-width:520px;min-height:100svh;margin:auto;padding:env(safe-area-inset-top) 15px calc(12px + env(safe-area-inset-bottom));display:flex;flex-direction:column;background:#050505}
+header{height:40px;flex:0 0 40px;display:flex;align-items:center;justify-content:center;padding:0}
+.logo{font:500 16px Georgia,serif;letter-spacing:.42em;padding-left:.42em;color:#f4f1e9}
+.tag{display:none}
+.stage{position:relative;flex:1 1 auto;width:100%;min-height:330px;max-height:calc(100svh - 275px);aspect-ratio:3/4;margin:auto 0 12px;overflow:hidden;border-radius:24px;background:#171614;box-shadow:0 8px 30px #0008;transition:width .18s,aspect-ratio .18s}
 video{width:100%;height:100%;object-fit:cover;display:block}
 video.selfie-preview{transform:scaleX(-1)}
 .placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
-.toolbar{position:absolute;z-index:2;top:12px;left:12px;right:12px;display:flex;justify-content:space-between}
-.pill{border:1px solid #ffffff70;background:#24231f66;color:white;border-radius:30px;padding:8px 12px;font-size:11px;backdrop-filter:blur(12px)}
-.zoom-panel{padding:13px 2px 1px}
-.zoom-head{display:flex;justify-content:space-between;align-items:center;font-size:9px;color:var(--muted);letter-spacing:.16em;margin-bottom:7px}
-.zoom-head strong{color:var(--ink);font-size:11px;letter-spacing:0;font-weight:500;font-variant-numeric:tabular-nums}
+.frame-guide{position:absolute;z-index:2;left:27%;top:24%;width:46%;height:52%;border:2px solid #fff;border-radius:22px;pointer-events:none;box-shadow:0 0 0 999px #00000008}
+.frame-label{position:absolute;z-index:3;top:calc(24% - 26px);left:0;right:0;text-align:center;color:white;font-size:12px;font-weight:650;letter-spacing:.04em;text-shadow:0 1px 4px #0009;pointer-events:none}
+.stage-meta{position:absolute;z-index:3;bottom:15px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;pointer-events:none}
+.meta-chip{background:#161512b8;color:#fff;border:1px solid #ffffff1c;border-radius:30px;padding:9px 13px;font-size:11px;backdrop-filter:blur(12px)}
+.toolbar{position:absolute;z-index:4;top:12px;left:12px;right:12px;display:flex;justify-content:flex-end}
+.pill{border:1px solid #ffffff40;background:#17161480;color:white;border-radius:30px;padding:8px 12px;font-size:11px;backdrop-filter:blur(12px)}
+.zoom-panel{padding:2px 6px 4px}
+.zoom-head{display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#9e9b94;letter-spacing:.16em;margin-bottom:5px}
+.zoom-head strong{color:#f5f2eb;font-size:11px;letter-spacing:0;font-weight:500;font-variant-numeric:tabular-nums}
 .zoom-row{display:flex;align-items:center;gap:10px}
 .zoom-row span{font-size:10px!important;color:#aaa69e!important}
-.zoom-row input{width:100%;height:2px;accent-color:#718f82}
-.ratios{display:flex;justify-content:center;gap:5px;padding:11px 0 0}
-.ratio{border:1px solid transparent;background:transparent;color:#a19c93;border-radius:20px;padding:6px 12px;font-size:10px;letter-spacing:.04em}
-.ratio[aria-pressed=true]{background:#eae8e1;color:#33312b;border-color:#e1ded5;font-weight:600}
-.filters{display:flex;gap:9px;overflow-x:auto;padding:15px 1px 10px;scrollbar-width:none;scroll-snap-type:x proximity}
+.zoom-row input{width:100%;height:2px;accent-color:#e9e5dc}
+.ratios{display:flex;justify-content:center;gap:5px;padding:5px 0 3px}
+.ratio{border:1px solid transparent;background:transparent;color:#8f8d87;border-radius:20px;padding:5px 11px;font-size:10px;letter-spacing:.04em}
+.ratio[aria-pressed=true]{background:#292824;color:#fff;border-color:#494740;font-weight:600}
+.filters{display:flex;gap:9px;overflow-x:auto;padding:9px 1px 8px;scrollbar-width:none;scroll-snap-type:x proximity}
 .filters::-webkit-scrollbar{display:none}
-.filter{flex:0 0 62px;border:0;background:none;color:#a19c93;font-size:9px;letter-spacing:.07em;padding:0;scroll-snap-align:start}
-.swatch{height:43px;border-radius:10px;margin-bottom:6px;border:2px solid transparent;box-shadow:inset 0 0 0 1px #ffffff65}
-.filter[aria-pressed=true]{color:#292821;font-weight:650}
-.filter[aria-pressed=true] .swatch{border-color:#758f82;box-shadow:0 2px 8px #343c3420}
-.caption{text-align:center;font:italic 11px Georgia,serif;color:#a19b91;padding:3px 0 9px;min-height:25px}
-.controls{display:flex;align-items:center;justify-content:center;gap:32px;padding:5px 8px 4px}
-.round{width:42px;height:42px;border-radius:50%;border:1px solid #e5e1d9;background:#efede7;color:#55534d;font-size:18px;display:grid;place-items:center}
-.round[aria-pressed=true]{background:#dce6df;border-color:#c6d5cb}
-.shutter{width:68px;height:68px;border:1px solid #393831;border-radius:50%;background:transparent;display:grid;place-items:center;padding:0}
-.shutter:after{content:"";width:56px;height:56px;border-radius:50%;background:#fff;border:1px solid #e5e2db;box-shadow:inset 0 0 0 1px #f4f2ed}
-.status{text-align:center;color:#aaa49a;font-size:10px;min-height:17px;padding-top:5px;letter-spacing:.025em}
+.filter{flex:0 0 57px;border:0;background:none;color:#85827b;font-size:8px;letter-spacing:.07em;padding:0;scroll-snap-align:start}
+.swatch{height:36px;border-radius:9px;margin-bottom:5px;border:2px solid transparent;box-shadow:inset 0 0 0 1px #ffffff35}
+.filter[aria-pressed=true]{color:#fff;font-weight:650}
+.filter[aria-pressed=true] .swatch{border-color:#f1eee6}
+.caption{text-align:center;font:italic 10px Georgia,serif;color:#918d85;padding:1px 0 4px;min-height:17px}
+.controls{display:flex;align-items:center;justify-content:space-around;gap:12px;padding:5px 13px 8px}
+.round{width:42px;height:42px;border-radius:50%;border:0;background:transparent;color:#f4f2ed;font-size:25px;display:grid;place-items:center}
+.round[aria-pressed=true]{background:#35332e}
+.shutter{width:78px;height:78px;border:2px solid #f5f4f0;border-radius:50%;background:transparent;display:grid;place-items:center;padding:0;flex:0 0 78px}
+.shutter:after{content:"";width:65px;height:65px;border-radius:50%;background:#fff;border:1px solid #d8d6d0}
+.status{text-align:center;color:#88857e;font-size:9px;min-height:15px;padding-top:1px;letter-spacing:.025em}
 #result{display:none;text-align:center;padding:10px 0}
-#photo{max-width:100%;max-height:34svh;border-radius:13px}
+#photo{max-width:100%;max-height:25svh;border-radius:13px}
 .actions{display:flex;gap:10px;justify-content:center;margin-top:10px}
-.action{border:1px solid var(--line);border-radius:22px;background:#fff;color:var(--ink);padding:10px 17px;text-decoration:none;font-size:12px}
-footer{margin-top:auto;text-align:center;color:#b8b2a9;font-size:8px;letter-spacing:.2em;padding-top:12px}
+.action{border:1px solid #45433d;border-radius:22px;background:#191815;color:#fff;padding:10px 17px;text-decoration:none;font-size:12px}
+footer{display:none}
 button{cursor:pointer;-webkit-tap-highlight-color:transparent}
-@media(max-height:740px){header{padding:8px 0 11px}.stage{max-height:49svh}.filters{padding-top:11px}.swatch{height:37px}.controls{padding-top:2px}}
+@media(max-height:740px){header{height:30px;flex-basis:30px}.stage{max-height:calc(100svh - 240px);min-height:260px}.controls{padding-top:1px}.shutter{width:68px;height:68px;flex-basis:68px}.shutter:after{width:57px;height:57px}}
+
 </style>
 </head>
 <body><div class="app">
 <header><div class="logo">MOONI</div><div class="tag">little moments, softly remembered.</div></header>
 <section class="stage">
 <video id="video" autoplay playsinline muted></video>
-<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div>
+<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="frame-guide"></div><div class="frame-label">53mm</div><div class="stage-meta"><span class="meta-chip" id="lensMeta">◉ &nbsp; 1×</span><span class="meta-chip" id="exposureMeta">☼ &nbsp; AUTO</span></div>
 </section>
 <nav class="filters" aria-label="Bộ lọc màu">
 <button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
@@ -85,14 +91,14 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
  <button class="ratio" data-ratio="full" aria-pressed="false">FULL</button>
 </div>
 <div class="caption" id="caption">Màu gốc, giữ nguyên chất ảnh camera.</div>
-<div class="controls"><button class="round" id="last" aria-label="Ảnh vừa chụp">▧</button><button class="shutter" id="capture" aria-label="Chụp ảnh"></button><button class="round" id="flashToggle" aria-label="Bật đèn flash" aria-pressed="false">⚡</button><button class="round" id="flip2" aria-label="Đổi camera">⟳</button></div>
+<div class="controls"><button class="round" id="last" aria-label="Ảnh vừa chụp" title="Ảnh vừa chụp">▧</button><button class="round" id="filterToggle" aria-label="Hiện bộ lọc" title="Bộ lọc">▢</button><button class="round" id="timerToggle" aria-label="Hẹn giờ" title="Hẹn giờ">◷</button><button class="round" id="flashToggle" aria-label="Bật đèn flash" aria-pressed="false" title="Flash">ϟ</button><button class="round" id="flip2" aria-label="Đổi camera" title="Đổi camera">⟳</button></div><div class="controls" style="padding-top:0"><button class="shutter" id="capture" aria-label="Chụp ảnh"></button></div>
 <div class="status" id="status">MOONI · bản thử nghiệm miễn phí</div>
 <section id="result"><img id="photo" alt="Ảnh vừa chụp"><div class="actions"><a class="action" id="save" download="mooni-photo.jpg">Lưu ảnh</a><button class="action" id="again">Chụp tiếp</button></div></section>
 <footer>MADE OF LITTLE MOMENTS · MOONI</footer></div>
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,ratio='4:3',torchOn=false,torchSupported=false;
+let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,ratio='4:3',torchOn=false,torchSupported=false,timerSeconds=0;
 const looks={
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
@@ -121,6 +127,8 @@ async function setTorch(on){
  }catch(e){torchOn=false;$('flashToggle').setAttribute('aria-pressed','false');say('Không bật được đèn flash trên camera này.')}
 }
 $('flashToggle').addEventListener('click',()=>setTorch(!torchOn));
+$('filterToggle').addEventListener('click',()=>{const f=$('filterToggle');const nav=document.querySelector('.filters');nav.style.display=nav.style.display==='none'?'flex':'none';f.setAttribute('aria-pressed',String(nav.style.display==='none'));});
+$('timerToggle').addEventListener('click',()=>{timerSeconds=timerSeconds===0?3:timerSeconds===3?10:0;$('timerToggle').textContent=timerSeconds?String(timerSeconds):'◷';$('timerToggle').setAttribute('aria-pressed',String(!!timerSeconds));say(timerSeconds?'Hẹn giờ '+timerSeconds+' giây':'Đã tắt hẹn giờ');});
 function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===name)));video.style.filter=looks[name].css;$('caption').textContent=looks[name].caption}
 document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.f)));
 async function startCamera(){
