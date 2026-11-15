@@ -15,7 +15,7 @@
 .app{max-width:540px;min-height:100svh;margin:auto;padding:env(safe-area-inset-top) 17px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
 header{text-align:center;padding:17px 0 15px}.logo{font:400 26px Georgia,serif;letter-spacing:.34em}.tag{font:italic 11px Georgia,serif;color:var(--muted);margin-top:7px}
 .stage{position:relative;aspect-ratio:3/4;max-height:59svh;overflow:hidden;border-radius:21px;background:#c9c7bd;box-shadow:0 8px 25px #57453820}
-video{width:100%;height:100%;object-fit:cover;display:block}.placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
+video{width:100%;height:100%;object-fit:cover;display:block}video.selfie-preview{transform:scaleX(-1)}.placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
 .toolbar{position:absolute;z-index:2;top:12px;left:12px;right:12px;display:flex;justify-content:space-between}
 .pill{border:1px solid #ffffff80;background:#241e1a80;color:white;border-radius:30px;padding:9px 13px;font-size:12px;backdrop-filter:blur(8px)}
 .filters{display:flex;gap:10px;overflow-x:auto;padding:17px 1px 12px;scrollbar-width:none}.filters::-webkit-scrollbar{display:none}
@@ -73,7 +73,7 @@ async function startCamera(){
  if(!navigator.mediaDevices?.getUserMedia){say('Camera cần trang HTTPS. Hãy mở bằng Safari trên iPhone.');return}
  try{if(stream)stream.getTracks().forEach(t=>t.stop());
  stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:2560}}});
- video.srcObject=stream;await video.play();$('placeholder').style.display='none';say(facing==='user'?'Camera trước đang bật':'Camera sau đang bật');
+ video.srcObject=stream;video.classList.toggle('selfie-preview',facing==='user');await video.play();$('placeholder').style.display='none';say(facing==='user'?'Camera trước đang bật':'Camera sau đang bật');
  }catch(e){say('Chưa mở được camera. Hãy cấp quyền Camera cho Safari.')}
 }
 function flip(){facing=facing==='environment'?'user':'environment';startCamera()}
