@@ -28,7 +28,7 @@ header{height:40px;flex:0 0 40px;display:flex;align-items:center;justify-content
 .frame-label{position:absolute;z-index:3;top:calc(24% - 26px);left:0;right:0;text-align:center;color:white;font-size:12px;font-weight:650;letter-spacing:.04em;text-shadow:0 1px 4px #0009;pointer-events:none}
 .stage-meta{position:absolute;z-index:3;bottom:15px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;pointer-events:none}
 .meta-chip{background:#161512b8;color:#fff;border:1px solid #ffffff1c;border-radius:30px;padding:9px 13px;font-size:11px;backdrop-filter:blur(12px)}
-.toolbar{position:absolute;z-index:4;top:12px;left:12px;right:12px;display:flex;justify-content:flex-end}
+.toolbar{position:absolute;z-index:4;top:12px;left:12px;right:12px;display:flex;justify-content:flex-end}.zoom-control{display:flex;align-items:center;gap:2px;padding:4px;background:#171614b8;border:1px solid #ffffff35;border-radius:24px;backdrop-filter:blur(12px)}.zoom-control button{width:34px;height:30px;border:0;border-radius:18px;background:transparent;color:#fff;font-size:17px}.zoom-control #zoomReset{width:42px;font-size:11px;font-weight:650}
 .pill{border:1px solid #ffffff40;background:#17161480;color:white;border-radius:30px;padding:8px 12px;font-size:11px;backdrop-filter:blur(12px)}
 .ratio-wrap{padding:7px 0 5px}
 .ratio-label{font-size:8px;color:#77746e;letter-spacing:.18em;text-align:center;margin-bottom:7px}
@@ -66,7 +66,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <body><div class="app">
 <header><div class="logo">MOONI</div><div class="tag">little moments, softly remembered.</div></header>
 <section class="stage">
-<div class="live-frame" id="liveFrame"><video id="video" autoplay playsinline muted></video></div>
+<div class="live-frame" id="liveFrame"><video id="video" autoplay playsinline muted></video></div><div class="toolbar"><div class="zoom-control"><button id="zoomOut" aria-label="Thu nhỏ">−</button><button id="zoomReset" aria-label="Đặt lại zoom">1×</button><button id="zoomIn" aria-label="Phóng to">+</button></div></div>
 <div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="stage-meta"><span class="meta-chip" id="lensMeta">1×</span><span class="meta-chip" id="exposureMeta">☼ &nbsp; AUTO</span></div>
 </section>
 <nav class="filters" aria-label="Bộ lọc màu">
@@ -100,7 +100,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,ratio='4:3',torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
+let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,ratio='4:3',torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
 const looks={
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
@@ -160,18 +160,12 @@ async function startCamera(){
    if(caps[key]&&Array.isArray(caps[key])&&caps[key].includes('continuous'))advanced.push({[key]:'continuous'});
   }
   if(advanced.length){try{await track.applyConstraints({advanced})}catch(e){}}
-  nativeZoom=!!(caps.zoom&&typeof caps.zoom.max==='number'&&caps.zoom.max>1);
+  zoom=1;updateZoom();
   torchSupported=!!caps.torch;torchOn=false;
   $('flashToggle').setAttribute('aria-pressed','false');
   $('flashToggle').style.background='transparent';
   $('flashToggle').style.opacity=torchSupported?'1':'.55';
   $('flashToggle').title=torchSupported?'Bật/tắt đèn flash':'Thiết bị/trình duyệt không hỗ trợ đèn flash trong web camera';
-  zoom=1;updateZoom();
-  if(nativeZoom){
-   const desired=Math.min(caps.zoom.max,Math.max(caps.zoom.min||1,zoom));
-   zoom=desired;updateZoom();
-   try{await track.applyConstraints({advanced:[{zoom}]})}catch(e){nativeZoom=false;updateZoom()}
-  }
  }catch(e){
   $('placeholder').innerHTML='MOONI<br><small>Không mở được camera. Kiểm tra quyền Camera trong Cài đặt iPhone → Safari.</small>';
   $('placeholder').style.display='grid';
@@ -180,7 +174,10 @@ async function startCamera(){
 }
 function updateZoom(){
  $('lensMeta').textContent=zoom.toFixed(1)+'×';
- video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
+ video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(zoom>1?'scale('+zoom+')':'');
+ $('zoomReset').textContent=zoom.toFixed(1)+'×';
+ $('zoomOut').disabled=zoom<=1;
+ $('zoomIn').disabled=zoom>=3;
 }
 function setRatio(value){
  ratio=value;
@@ -197,6 +194,9 @@ function setRatio(value){
 document.querySelectorAll('.ratio').forEach(b=>b.addEventListener('click',()=>setRatio(b.dataset.ratio)));
 function flip(){if(torchOn)setTorch(false);facing=facing==='environment'?'user':'environment';startCamera()}
 $('flip2').onclick=flip;
+$('zoomOut').onclick=()=>{zoom=Math.max(1,Math.round((zoom-.25)*100)/100);updateZoom()};
+$('zoomIn').onclick=()=>{zoom=Math.min(3,Math.round((zoom+.25)*100)/100);updateZoom()};
+$('zoomReset').onclick=()=>{zoom=1;updateZoom()};
 $('capture').onclick=()=>{
  if(!stream||!video.videoWidth){say('Hãy bật camera trước nhé.');return}
  if(timerSeconds){const wait=timerSeconds;timerSeconds=0;$('timerToggle').textContent='◷';$('timerToggle').setAttribute('aria-pressed','false');let left=wait;say('Sẽ chụp sau '+left+' giây');const tick=()=>{left--;if(left>0){say('Còn '+left+' giây…');setTimeout(tick,1000)}else captureNow()};setTimeout(tick,1000);return}
@@ -209,8 +209,8 @@ function captureNow(){
  const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
  const target=ratios[ratio];let sx=0,sy=0,sw=vw,sh=vh;
  if(sw/sh>target){sw=sh*target;sx=(vw-sw)/2}else{sh=sw/target;sy=(vh-sh)/2}
- // When native lens zoom is unavailable, emulate zoom by cropping the sensor frame.
- if(!nativeZoom&&zoom>1){sw/=zoom;sh/=zoom;sx+=(vw/zoom-sw)/2;sy+=(vh/zoom-sh)/2}
+ // Match the live digital zoom by cropping the captured frame.
+ if(zoom>1){sw/=zoom;sh/=zoom;sx+=(vw/zoom-sw)/2;sy+=(vh/zoom-sh)/2}
  const w=Math.round(sw),h=Math.round(sh);canvas.width=w;canvas.height=h;
  ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css;ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();ctx.filter='none';
  const amount=looks[filter].grain;if(amount){const im=ctx.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){let n=(Math.random()-.5)*amount;d[i]+=n;d[i+1]+=n;d[i+2]+=n}ctx.putImageData(im,0,0)}
