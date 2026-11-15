@@ -72,6 +72,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <nav class="filters" aria-label="Bộ lọc màu">
 <button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
 <button class="filter" data-f="street" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#172a2a,#8e7964)"></div>STREET</button>
+<button class="filter" data-f="streetbeauty" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#182a2a,#b58d79)"></div>STREET BEAUTY</button>
 <button class="filter" data-f="coast" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#168b9b,#c1d2bb)"></div>COAST</button>
 <button class="filter" data-f="sunny" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#b98558,#ead6ae)"></div>SUNNY</button>
 <button class="filter" data-f="green" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#304c36,#aab58b)"></div>GREEN</button>
@@ -104,6 +105,7 @@ const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx
 let stream=null,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[],exposureValue=0,exposureRange=null,focusTimer=null;
 const looks={
  street:{css:'contrast(1.18) saturate(.88) brightness(.94) sepia(.06)',grain:0,caption:'Street tone · đen sâu, màu trầm lạnh, da và ánh đèn ấm, nét rõ.'},
+ streetbeauty:{css:'contrast(1.16) saturate(.9) brightness(.96) sepia(.055)',grain:0,caption:'Street Beauty · màu street, da dịu và đều hơn, vẫn giữ chi tiết.'},
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
  sunny:{css:'saturate(1.08) contrast(1.08) sepia(.10) brightness(1.025)',grain:0,caption:'Ánh nắng ấm, da tự nhiên và màu film compact.'},
@@ -283,6 +285,30 @@ function captureNow(){
  if(!nativeZoom&&zoom>1){const baseW=sw,baseH=sh;sw=baseW/zoom;sh=baseH/zoom;sx+=(baseW-sw)/2;sy+=(baseH-sh)/2}
  const w=Math.round(sw),h=Math.round(sh);canvas.width=w;canvas.height=h;
  ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css+' brightness('+Math.pow(2,exposureValue/2).toFixed(3)+')';ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();ctx.filter='none';
+ if(filter==='streetbeauty'){
+  // Gentle skin-tone selective smoothing: blend a lightly blurred layer only
+  // on likely skin pixels, while keeping edges and fine detail from the original.
+  const small=document.createElement('canvas');
+  small.width=Math.max(1,Math.round(w/4));small.height=Math.max(1,Math.round(h/4));
+  const sc=small.getContext('2d');
+  sc.filter='blur(1.2px)';sc.drawImage(canvas,0,0,small.width,small.height);sc.filter='none';
+  const soft=document.createElement('canvas');soft.width=w;soft.height=h;
+  const tc=soft.getContext('2d');tc.imageSmoothingEnabled=true;tc.drawImage(small,0,0,w,h);
+  const base=ctx.getImageData(0,0,w,h),blurred=tc.getImageData(0,0,w,h),d=base.data,b=blurred.data;
+  for(let i=0;i<d.length;i+=4){
+   const r=d[i],g=d[i+1],bl=d[i+2];
+   const cb=128-0.168736*r-0.331264*g+0.5*bl;
+   const cr=128+0.5*r-0.418688*g-0.081312*bl;
+   const skin=(cr>132&&cr<178&&cb>72&&cb<135&&r>g*.92&&g>bl*.9);
+   if(skin){
+    const amount=.28;
+    d[i]=d[i]*(1-amount)+b[i]*amount;
+    d[i+1]=d[i+1]*(1-amount)+b[i+1]*amount;
+    d[i+2]=d[i+2]*(1-amount)+b[i+2]*amount;
+   }
+  }
+  ctx.putImageData(base,0,0);
+ }
  if(filter==='street'){
   const im=ctx.getImageData(0,0,w,h),d=im.data;
   for(let i=0;i<d.length;i+=4){
