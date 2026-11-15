@@ -52,9 +52,14 @@ video.selfie-preview{transform:scaleX(-1)}
 .shutter{width:78px;height:78px;border:2px solid #f5f4f0;border-radius:50%;background:transparent;display:grid;place-items:center;padding:0;flex:0 0 78px}
 .shutter:after{content:"";width:65px;height:65px;border-radius:50%;background:#fff;border:1px solid #d8d6d0}
 .status{text-align:center;color:#88857e;font-size:9px;min-height:15px;padding-top:1px;letter-spacing:.025em}
-#result{display:none;text-align:center;padding:10px 0}
-#photo{max-width:100%;max-height:25svh;border-radius:13px}
-.actions{display:flex;gap:10px;justify-content:center;margin-top:10px}
+#result{display:none}
+.gallery{display:none;position:fixed;z-index:20;inset:0;background:#080807;padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 16px);overflow:auto}
+.gallery.open{display:block}.gallery-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.2em;padding:6px 2px 18px}
+.gallery-close{border:0;background:none;color:white;font-size:30px}.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.gallery-thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px;background:#222}
+.gallery-empty{color:#85827b;text-align:center;font:italic 14px Georgia,serif;padding:45px 10px}
+.gallery-preview{display:none;text-align:center}.gallery-preview img{max-width:100%;max-height:72svh;object-fit:contain;border-radius:8px}
+.gallery-actions{display:flex;gap:10px;justify-content:center;margin-top:14px}
 .action{border:1px solid #45433d;border-radius:22px;background:#191815;color:#fff;padding:10px 17px;text-decoration:none;font-size:12px}
 footer{display:none}
 button{cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -66,7 +71,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <header><div class="logo">MOONI</div><div class="tag">little moments, softly remembered.</div></header>
 <section class="stage">
 <video id="video" autoplay playsinline muted></video>
-<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="stage-meta"><span class="meta-chip" id="lensMeta">53mm</span><span class="meta-chip" id="exposureMeta">☼ &nbsp; AUTO</span></div>
+<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="stage-meta"><span class="meta-chip" id="lensMeta">1×</span><span class="meta-chip" id="exposureMeta">☼ &nbsp; AUTO</span></div>
 </section>
 <nav class="filters" aria-label="Bộ lọc màu">
 <button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
@@ -82,10 +87,6 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <button class="filter" data-f="mono" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#333,#d8d4ce)"></div>MONO</button>
 <button class="filter" data-f="vivid" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#177b80,#e5b77c)"></div>VIVID</button>
 </nav>
-<div class="zoom-panel">
- <div class="zoom-head"><span>FOCAL LENGTH</span><strong id="zoomValue">53mm</strong></div>
- <div class="zoom-row"><button class="lens-choice" data-mm="40">40</button><button class="lens-choice active" data-mm="53">53</button><button class="lens-choice" data-mm="72">72</button><button class="lens-choice" data-mm="97">97</button></div>
-</div>
 <div class="ratio-wrap"><div class="ratio-label">ASPECT RATIO</div><div class="ratios" aria-label="Tỷ lệ ảnh">
  <button class="ratio" data-ratio="4:3" aria-pressed="true">4:3</button>
  <button class="ratio" data-ratio="16:9" aria-pressed="false">16:9</button>
@@ -94,12 +95,16 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <div class="caption" id="caption">Màu gốc, giữ nguyên chất ảnh camera.</div>
 <div class="controls"><button class="round" id="last" aria-label="Ảnh vừa chụp" title="Ảnh vừa chụp">▧</button><button class="round" id="filterToggle" aria-label="Hiện bộ lọc" title="Bộ lọc">▢</button><button class="round" id="timerToggle" aria-label="Hẹn giờ" title="Hẹn giờ">◷</button><button class="round" id="flashToggle" aria-label="Bật đèn flash" aria-pressed="false" title="Flash">ϟ</button><button class="round" id="flip2" aria-label="Đổi camera" title="Đổi camera">⟳</button></div><div class="controls" style="padding-top:0"><button class="shutter" id="capture" aria-label="Chụp ảnh"></button></div>
 <div class="status" id="status">MOONI · bản thử nghiệm miễn phí</div>
-<section id="result"><img id="photo" alt="Ảnh vừa chụp"><div class="actions"><a class="action" id="save" download="mooni-photo.jpg">Lưu ảnh</a><button class="action" id="again">Chụp tiếp</button></div></section>
+<section id="gallery" class="gallery" aria-label="Thư viện ảnh">
+ <div class="gallery-head"><span>THƯ VIỆN MOONI</span><button id="closeGallery" class="gallery-close" aria-label="Đóng thư viện">×</button></div>
+ <div id="galleryGrid" class="gallery-grid"></div><div id="galleryEmpty" class="gallery-empty">Ảnh chụp sẽ tự động lưu ở đây.</div>
+ <div id="galleryPreview" class="gallery-preview"><img id="galleryPhoto" alt="Ảnh trong thư viện"><div class="gallery-actions"><a id="galleryDownload" class="action" download="mooni-photo.jpg">Tải ảnh về iPhone</a><button id="galleryBack" class="action">Quay lại</button></div></div>
+</section>
 <footer>MADE OF LITTLE MOMENTS · MOONI</footer></div>
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1.325,nativeZoom=false,ratio='4:3',torchOn=false,torchSupported=false,timerSeconds=0,focal=53;
+let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,ratio='4:3',torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
 const looks={
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
@@ -154,7 +159,7 @@ async function startCamera(){
   $('flashToggle').style.background='transparent';
   $('flashToggle').style.opacity=torchSupported?'1':'.55';
   $('flashToggle').title=torchSupported?'Bật/tắt đèn flash':'Thiết bị/trình duyệt không hỗ trợ đèn flash trong web camera';
-  zoom=1.325;focal=53;updateZoom();
+  zoom=1;updateZoom();
   if(nativeZoom){
    const desired=Math.min(caps.zoom.max,Math.max(caps.zoom.min||1,zoom));
    zoom=desired;updateZoom();
@@ -167,16 +172,9 @@ async function startCamera(){
  }
 }
 function updateZoom(){
- $('zoomValue').textContent=focal+'mm';
- document.querySelectorAll('.lens-choice').forEach(b=>b.classList.toggle('active',Number(b.dataset.mm)===focal));
- video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom?'scale('+zoom+')':'');
- $('lensMeta').textContent=focal+'mm';
+ $('lensMeta').textContent=zoom.toFixed(1)+'×';
+ video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
 }
-async function setZoom(value,mm){
- zoom=Number(value);if(mm)focal=Number(mm);updateZoom();
- if(nativeZoom&&stream){try{await stream.getVideoTracks()[0].applyConstraints({advanced:[{zoom}]})}catch(e){nativeZoom=false;updateZoom();say('Đang dùng zoom kỹ thuật số · độ nét có thể giảm')}}
-}
-document.querySelectorAll('.lens-choice').forEach(b=>b.addEventListener('click',()=>{const mm=Number(b.dataset.mm);const factors={40:1,53:1.325,72:1.8,97:2.425};setZoom(factors[mm],mm)}));
 function setRatio(value){
  ratio=value;
  document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
@@ -204,10 +202,28 @@ function captureNow(){
  const w=Math.round(sw),h=Math.round(sh);canvas.width=w;canvas.height=h;
  ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css;ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();ctx.filter='none';
  const amount=looks[filter].grain;if(amount){const im=ctx.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){let n=(Math.random()-.5)*amount;d[i]+=n;d[i+1]+=n;d[i+2]+=n}ctx.putImageData(im,0,0)}
- canvas.toBlob(blob=>{if(!blob){say('Lỗi tạo ảnh, thử lại nhé.');return}if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(blob);$('photo').src=lastUrl;$('save').href=lastUrl;$('result').style.display='block';say('Ảnh đã chụp · nhấn Lưu ảnh để lưu về iPhone')},'image/jpeg',.97)
+ canvas.toBlob(async blob=>{
+  if(!blob){say('Lỗi tạo ảnh, thử lại nhé.');return}
+  try{
+   const item={id:Date.now(),blob,createdAt:new Date().toISOString()};
+   await saveGalleryItem(item);await refreshGallery();
+   if(lastUrl)URL.revokeObjectURL(lastUrl);
+   lastUrl=URL.createObjectURL(blob);
+   say('Đã tự động lưu ảnh vào thư viện MOONI');
+  }catch(e){say('Không lưu được ảnh vào thư viện. Kiểm tra dung lượng iPhone nhé.')}
+ },'image/jpeg',.97)
 };
 $('again').onclick=()=>$('result').style.display='none';
-$('last').onclick=()=>{if(lastUrl){$('result').style.display='block'}else say('Ảnh vừa chụp sẽ xuất hiện ở đây.')};
+$('last').onclick=async()=>{await refreshGallery();$('gallery').classList.add('open')};
+$('closeGallery').onclick=()=>{$('gallery').classList.remove('open');$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid'};
+$('galleryBack').onclick=()=>{$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid'};
+async function openGalleryItem(item){
+ const url=URL.createObjectURL(item.blob);$('galleryPhoto').src=url;$('galleryDownload').href=url;$('galleryDownload').download='mooni-'+item.id+'.jpg';
+ $('galleryGrid').style.display='none';$('galleryEmpty').style.display='none';$('galleryPreview').style.display='block';
+}
+function openGalleryDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open('mooni-gallery',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('photos'))req.result.createObjectStore('photos',{keyPath:'id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function saveGalleryItem(item){const db=await openGalleryDB();await new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put(item);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}
+async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
