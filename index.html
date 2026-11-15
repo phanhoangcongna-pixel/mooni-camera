@@ -263,7 +263,7 @@ function captureNow(){
  },'image/jpeg',1)
 };
 $('last').onclick=async()=>{await refreshGallery();$('gallery').classList.add('open')};
-$('closeGallery').onclick=()=>{$('gallery').classList.remove('open');$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid';if(galleryViewUrl){URL.revokeObjectURL(galleryViewUrl);galleryViewUrl=null}};
+$('closeGallery').onclick=async()=>{$('gallery').classList.remove('open');$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid';if(galleryViewUrl){URL.revokeObjectURL(galleryViewUrl);galleryViewUrl=null}await startCamera();};
 $('galleryBack').onclick=()=>{$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid';if(galleryViewUrl){URL.revokeObjectURL(galleryViewUrl);galleryViewUrl=null}};
 async function openGalleryItem(item){
  galleryIndex=galleryItems.findIndex(x=>x.id===item.id);
