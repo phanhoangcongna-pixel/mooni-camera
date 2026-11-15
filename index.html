@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4eee7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MOONI">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>MOONI Camera</title>
+<style>
+:root{--bg:#f4eee7;--ink:#493d36;--muted:#9b887d;--line:#e4d8cf;--accent:#b88f7f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:540px;min-height:100svh;margin:auto;padding:env(safe-area-inset-top) 17px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+header{text-align:center;padding:17px 0 15px}.logo{font:400 26px Georgia,serif;letter-spacing:.34em}.tag{font:italic 11px Georgia,serif;color:var(--muted);margin-top:7px}
+.stage{position:relative;aspect-ratio:3/4;max-height:59svh;overflow:hidden;border-radius:21px;background:#c9c7bd;box-shadow:0 8px 25px #57453820}
+video{width:100%;height:100%;object-fit:cover;display:block}.placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
+.toolbar{position:absolute;z-index:2;top:12px;left:12px;right:12px;display:flex;justify-content:space-between}
+.pill{border:1px solid #ffffff80;background:#241e1a80;color:white;border-radius:30px;padding:9px 13px;font-size:12px;backdrop-filter:blur(8px)}
+.filters{display:flex;gap:10px;overflow-x:auto;padding:17px 1px 12px;scrollbar-width:none}.filters::-webkit-scrollbar{display:none}
+.filter{flex:0 0 75px;border:0;background:none;color:var(--muted);font-size:10px;letter-spacing:.04em;padding:0}
+.swatch{height:49px;border-radius:14px;margin-bottom:7px;border:2px solid transparent;box-shadow:inset 0 0 0 1px #fff8}
+.filter[aria-pressed=true]{color:var(--ink);font-weight:700}.filter[aria-pressed=true] .swatch{border-color:var(--accent)}
+.caption{text-align:center;font:italic 12px Georgia,serif;color:var(--muted);padding:5px 0 8px}
+.controls{display:flex;align-items:center;justify-content:space-between;padding:8px 8px}
+.round{width:49px;height:49px;border-radius:50%;border:1px solid var(--line);background:#fff9;color:var(--ink);font-size:20px}
+.shutter{width:78px;height:78px;border:2px solid var(--ink);border-radius:50%;background:transparent;display:grid;place-items:center}
+.shutter:after{content:"";width:61px;height:61px;border-radius:50%;background:#fff;border:1px solid #d8c9bf}
+.status{text-align:center;color:var(--muted);font-size:11px;min-height:19px}
+#result{display:none;text-align:center;padding:10px 0}#photo{max-width:100%;max-height:34svh;border-radius:15px}
+.actions{display:flex;gap:10px;justify-content:center;margin-top:10px}.action{border:1px solid var(--line);border-radius:22px;background:#fff9;color:var(--ink);padding:10px 17px;text-decoration:none;font-size:12px}
+footer{margin-top:auto;text-align:center;color:#ae9d93;font-size:10px;letter-spacing:.12em;padding-top:13px}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+</style>
+</head>
+<body><div class="app">
+<header><div class="logo">MOONI</div><div class="tag">little moments, softly remembered.</div></header>
+<section class="stage">
+<video id="video" autoplay playsinline muted></video>
+<div class="placeholder" id="placeholder">Một khoảnh khắc nhỏ,<br>được lưu thật tự nhiên.<br><small>Chạm “Bật camera” để bắt đầu</small></div>
+<div class="toolbar"><button class="pill" id="flip">↻ Đổi cam</button><button class="pill" id="start">Bật camera</button></div>
+</section>
+<nav class="filters" aria-label="Bộ lọc màu">
+<button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
+<button class="filter" data-f="coast" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#168b9b,#c1d2bb)"></div>COAST</button>
+<button class="filter" data-f="sunny" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#b98558,#ead6ae)"></div>SUNNY</button>
+<button class="filter" data-f="green" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#304c36,#aab58b)"></div>GREEN</button>
+<button class="filter" data-f="flash" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#79583e,#e5c69c)"></div>FLASH</button>
+<button class="filter" data-f="softfilm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#c2a990,#e9ddcc)"></div>SOFT FILM</button>
+</nav>
+<div class="caption" id="caption">Màu gốc, giữ nguyên chất ảnh camera.</div>
+<div class="controls"><button class="round" id="last" aria-label="Ảnh vừa chụp">▧</button><button class="shutter" id="capture" aria-label="Chụp ảnh"></button><button class="round" id="flip2" aria-label="Đổi camera">⟳</button></div>
+<div class="status" id="status">MOONI · bản thử nghiệm miễn phí</div>
+<section id="result"><img id="photo" alt="Ảnh vừa chụp"><div class="actions"><a class="action" id="save" download="mooni-photo.jpg">Lưu ảnh</a><button class="action" id="again">Chụp tiếp</button></div></section>
+<footer>MADE OF LITTLE MOMENTS · MOONI</footer></div>
+<canvas id="canvas" hidden></canvas>
+<script>
+const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
+let stream=null,facing='environment',filter='original',lastUrl=null;
+const looks={
+ original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
+ coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
+ sunny:{css:'saturate(1.08) contrast(1.08) sepia(.10) brightness(1.025)',grain:0,caption:'Ánh nắng ấm, da tự nhiên và màu film compact.'},
+ green:{css:'saturate(1.12) contrast(1.16) brightness(.985) hue-rotate(-4deg)',grain:0,caption:'Xanh lá trầm, bóng đổ sâu, giữ chi tiết.'},
+ flash:{css:'saturate(1.02) contrast(1.20) brightness(1.015)',grain:0,caption:'Tương phản kiểu máy ảnh du lịch, không làm mịn da.'},
+ softfilm:{css:'saturate(.94) contrast(1.02) sepia(.07) brightness(1.015)',grain:1.4,caption:'Màu film nhẹ cùng chút grain cực tinh tế.'}
+};
+function say(t){$('status').textContent=t}
+function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===name)));video.style.filter=looks[name].css;$('caption').textContent=looks[name].caption}
+document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.f)));
+async function startCamera(){
+ if(!navigator.mediaDevices?.getUserMedia){say('Camera cần trang HTTPS. Hãy mở bằng Safari trên iPhone.');return}
+ try{if(stream)stream.getTracks().forEach(t=>t.stop());
+ stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:2560}}});
+ video.srcObject=stream;await video.play();$('placeholder').style.display='none';say(facing==='user'?'Camera trước đang bật':'Camera sau đang bật');
+ }catch(e){say('Chưa mở được camera. Hãy cấp quyền Camera cho Safari.')}
+}
+function flip(){facing=facing==='environment'?'user':'environment';startCamera()}
+$('start').onclick=startCamera;$('flip').onclick=flip;$('flip2').onclick=flip;
+$('capture').onclick=()=>{
+ if(!stream||!video.videoWidth){say('Hãy bật camera trước nhé.');return}
+ const w=video.videoWidth,h=video.videoHeight;canvas.width=w;canvas.height=h;
+ ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css;ctx.drawImage(video,0,0,w,h);ctx.restore();ctx.filter='none';
+ const amount=looks[filter].grain;if(amount){const im=ctx.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){let n=(Math.random()-.5)*amount;d[i]+=n;d[i+1]+=n;d[i+2]+=n}ctx.putImageData(im,0,0)}
+ canvas.toBlob(blob=>{if(!blob){say('Lỗi tạo ảnh, thử lại nhé.');return}if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(blob);$('photo').src=lastUrl;$('save').href=lastUrl;$('result').style.display='block';say('Ảnh đã chụp · nhấn Lưu ảnh để lưu về iPhone')},'image/jpeg',.97)
+};
+$('again').onclick=()=>$('result').style.display='none';
+$('last').onclick=()=>{if(lastUrl){$('result').style.display='block'}else say('Ảnh vừa chụp sẽ xuất hiện ở đây.')};
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script></body></html>
