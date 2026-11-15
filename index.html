@@ -20,7 +20,7 @@ header{height:40px;flex:0 0 40px;display:flex;align-items:center;justify-content
 .tag{display:none}
 .stage{position:relative;flex:1 1 auto;width:100%;min-height:330px;max-height:calc(100svh - 275px);aspect-ratio:3/4;margin:auto 0 12px;overflow:hidden;border-radius:24px;background:#171614;box-shadow:0 8px 30px #0008;transition:width .18s,aspect-ratio .18s}
 .live-frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#000}
-.live-frame video{width:100%;height:100%;object-fit:cover;display:block}
+.live-frame video{width:100%;height:100%;object-fit:contain;display:block}
 .live-frame video.selfie-preview{transform:scaleX(-1)}
 .stage{transition:none}
 .placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
@@ -140,9 +140,10 @@ async function startCamera(){
   if(stream)stream.getTracks().forEach(t=>t.stop());
   const request={audio:false,video:{
    facingMode:{ideal:facing},
-   width:{ideal:2160},
-   height:{ideal:3840},
-   frameRate:{ideal:30,max:60}
+   width:{ideal:1080},
+   height:{ideal:1920},
+   aspectRatio:{ideal:0.75},
+   frameRate:{ideal:30,max:30}
   }};
   stream=await navigator.mediaDevices.getUserMedia(request);
   video.srcObject=stream;
@@ -151,7 +152,7 @@ async function startCamera(){
   video.play().catch(()=>{say('Camera đã kết nối. Chạm vào khung ảnh nếu chưa thấy hình.');});
   video.onloadedmetadata=()=>{
    $('placeholder').style.display='none';
-   say((facing==='user'?'Camera trước':'Camera sau')+' · '+video.videoWidth+'×'+video.videoHeight+' · chất lượng tối đa thiết bị cho phép');
+   say((facing==='user'?'Camera trước':'Camera sau')+' · '+video.videoWidth+'×'+video.videoHeight+' · zoom 1×');
   };
   const track=stream.getVideoTracks()[0],caps=track.getCapabilities?track.getCapabilities():{};
   // Ask supported devices for continuous autofocus/exposure/white balance.
