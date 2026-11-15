@@ -105,7 +105,7 @@ const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx
 let stream=null,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[],exposureValue=0,exposureRange=null,focusTimer=null;
 const looks={
  street:{css:'contrast(1.18) saturate(.88) brightness(.94) sepia(.06)',grain:0,caption:'Street tone · đen sâu, màu trầm lạnh, da và ánh đèn ấm, nét rõ.'},
- streetbeauty:{css:'contrast(1.16) saturate(.9) brightness(.96) sepia(.055)',grain:0,caption:'Street Beauty · màu street, da dịu và đều hơn, vẫn giữ chi tiết.'},
+ streetbeauty:{css:'contrast(1.12) saturate(.92) brightness(1.015) sepia(.045)',grain:0,caption:'Street Beauty · da mịn hơn, giảm sần và giữ nét khuôn mặt.'},
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
  sunny:{css:'saturate(1.08) contrast(1.08) sepia(.10) brightness(1.025)',grain:0,caption:'Ánh nắng ấm, da tự nhiên và màu film compact.'},
@@ -191,7 +191,7 @@ async function applyExposure(value){
  $('exposureSlider').value=exposureValue;
  $('exposureValue').textContent=(exposureValue>0?'+':'')+exposureValue.toFixed(1);
  const brightness=Math.pow(2,exposureValue/2);
- video.style.filter='brightness('+brightness.toFixed(3)+')';
+ video.style.filter='brightness('+brightness.toFixed(3)+') '+(filter==='streetbeauty'?'contrast(1.04) saturate(.94) brightness(1.015)':'');
  const track=stream?.getVideoTracks()[0];
  if(track&&exposureRange){
   const nativeValue=Math.max(exposureRange.min,Math.min(exposureRange.max,exposureValue));
@@ -236,6 +236,7 @@ function updateZoom(){
  const track=stream?.getVideoTracks()[0];
  if(nativeZoom&&track&&zoomCaps){const hardwareZoom=Math.min(zoomCaps.max,Math.max(zoomCaps.min,zoom));track.applyConstraints({advanced:[{zoom:hardwareZoom}]}).catch(()=>{nativeZoom=false;updateZoom()});}
  video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
+ video.style.filter='brightness('+Math.pow(2,exposureValue/2).toFixed(3)+') '+(filter==='streetbeauty'?'contrast(1.04) saturate(.94) brightness(1.015)':'');
  $('zoomReset').textContent=zoom.toFixed(1)+'×';
  $('zoomOut').disabled=zoom<=(nativeZoom?zoomCaps.min:1);
  $('zoomIn').disabled=zoom>=3;
@@ -289,9 +290,9 @@ function captureNow(){
   // Gentle skin-tone selective smoothing: blend a lightly blurred layer only
   // on likely skin pixels, while keeping edges and fine detail from the original.
   const small=document.createElement('canvas');
-  small.width=Math.max(1,Math.round(w/4));small.height=Math.max(1,Math.round(h/4));
+  small.width=Math.max(1,Math.round(w/3));small.height=Math.max(1,Math.round(h/3));
   const sc=small.getContext('2d');
-  sc.filter='blur(1.2px)';sc.drawImage(canvas,0,0,small.width,small.height);sc.filter='none';
+  sc.filter='blur(1.5px)';sc.drawImage(canvas,0,0,small.width,small.height);sc.filter='none';
   const soft=document.createElement('canvas');soft.width=w;soft.height=h;
   const tc=soft.getContext('2d');tc.imageSmoothingEnabled=true;tc.drawImage(small,0,0,w,h);
   const base=ctx.getImageData(0,0,w,h),blurred=tc.getImageData(0,0,w,h),d=base.data,b=blurred.data;
@@ -299,9 +300,9 @@ function captureNow(){
    const r=d[i],g=d[i+1],bl=d[i+2];
    const cb=128-0.168736*r-0.331264*g+0.5*bl;
    const cr=128+0.5*r-0.418688*g-0.081312*bl;
-   const skin=(cr>132&&cr<178&&cb>72&&cb<135&&r>g*.92&&g>bl*.9);
+   const skin=(cr>125&&cr<190&&cb>65&&cb<145&&r>g*.88&&g>bl*.82&&r>70&&g>38);
    if(skin){
-    const amount=.28;
+    const amount=.58;
     d[i]=d[i]*(1-amount)+b[i]*amount;
     d[i+1]=d[i+1]*(1-amount)+b[i+1]*amount;
     d[i+2]=d[i+2]*(1-amount)+b[i+2]*amount;
