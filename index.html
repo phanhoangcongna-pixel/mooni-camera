@@ -54,7 +54,7 @@ header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content
 .gallery-close{border:0;background:none;color:white;font-size:30px}.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .gallery-thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px;background:#222}
 .gallery-empty{color:#85827b;text-align:center;font:italic 14px Georgia,serif;padding:45px 10px}
-.gallery-preview{display:none;text-align:center}.gallery-preview img{max-width:100%;max-height:72svh;object-fit:contain;border-radius:8px}
+.gallery-preview{display:none;text-align:center}.gallery-preview img{max-width:100%;max-height:68svh;object-fit:contain;border-radius:8px;touch-action:pan-y}.gallery-nav{display:flex;align-items:center;justify-content:center;gap:22px;margin:12px 0 4px}.gallery-nav button{width:42px;height:36px;border:1px solid #45433d;border-radius:20px;background:#191815;color:#fff;font-size:20px}.gallery-count{font-size:11px;color:#aaa8a2;min-width:60px}
 .gallery-actions{display:flex;gap:10px;justify-content:center;margin-top:14px}
 .action{border:1px solid #45433d;border-radius:22px;background:#191815;color:#fff;padding:10px 17px;text-decoration:none;font-size:12px}
 footer{display:none}
@@ -94,13 +94,13 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <section id="gallery" class="gallery" aria-label="Thư viện ảnh">
  <div class="gallery-head"><span>THƯ VIỆN MOONI</span><button id="closeGallery" class="gallery-close" aria-label="Đóng thư viện">×</button></div>
  <div id="galleryGrid" class="gallery-grid"></div><div id="galleryEmpty" class="gallery-empty">Ảnh chụp sẽ tự động lưu ở đây.</div>
- <div id="galleryPreview" class="gallery-preview"><img id="galleryPhoto" alt="Ảnh trong thư viện"><div class="gallery-actions"><a id="galleryDownload" class="action" download="mooni-photo.jpg">Tải ảnh về iPhone</a><button id="galleryBack" class="action">Quay lại</button></div></div>
+ <div id="galleryPreview" class="gallery-preview"><img id="galleryPhoto" alt="Ảnh trong thư viện"><div class="gallery-nav"><button id="galleryPrev" aria-label="Ảnh trước">‹</button><span class="gallery-count" id="galleryCount">1 / 1</span><button id="galleryNext" aria-label="Ảnh tiếp theo">›</button></div><div class="gallery-actions"><a id="galleryDownload" class="action" download="mooni-photo.jpg">Tải ảnh về iPhone</a><button id="galleryBack" class="action">Quay lại</button></div></div>
 </section>
 <footer>MADE OF LITTLE MOMENTS · MOONI</footer></div>
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
+let stream=null,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
 const looks={
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
@@ -243,12 +243,34 @@ function captureNow(){
  },'image/jpeg',1)
 };
 $('last').onclick=async()=>{await refreshGallery();$('gallery').classList.add('open')};
-$('closeGallery').onclick=()=>{$('gallery').classList.remove('open');$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid'};
-$('galleryBack').onclick=()=>{$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid'};
+$('closeGallery').onclick=()=>{$('gallery').classList.remove('open');$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid';if(galleryViewUrl){URL.revokeObjectURL(galleryViewUrl);galleryViewUrl=null}};
+$('galleryBack').onclick=()=>{$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid';if(galleryViewUrl){URL.revokeObjectURL(galleryViewUrl);galleryViewUrl=null}};
 async function openGalleryItem(item){
- const url=URL.createObjectURL(item.blob);$('galleryPhoto').src=url;$('galleryDownload').href=url;$('galleryDownload').download='mooni-'+item.id+'.jpg';
+ galleryIndex=galleryItems.findIndex(x=>x.id===item.id);
+ if(galleryIndex<0)galleryIndex=0;
+ showGalleryPhoto();
+}
+function showGalleryPhoto(){
+ if(!galleryItems.length)return;
+ galleryIndex=(galleryIndex+galleryItems.length)%galleryItems.length;
+ const item=galleryItems[galleryIndex];
+ if(galleryViewUrl)URL.revokeObjectURL(galleryViewUrl);
+ galleryViewUrl=URL.createObjectURL(item.blob);
+ $('galleryPhoto').src=galleryViewUrl;
+ $('galleryDownload').href=galleryViewUrl;
+ $('galleryDownload').download='mooni-'+item.id+'.jpg';
+ $('galleryCount').textContent=(galleryIndex+1)+' / '+galleryItems.length;
+ $('galleryPrev').disabled=galleryItems.length<2;
+ $('galleryNext').disabled=galleryItems.length<2;
  $('galleryGrid').style.display='none';$('galleryEmpty').style.display='none';$('galleryPreview').style.display='block';
 }
+function stepGallery(delta){if(galleryItems.length>1){galleryIndex=(galleryIndex+delta+galleryItems.length)%galleryItems.length;showGalleryPhoto()}}
+$('galleryPrev').onclick=()=>stepGallery(-1);
+$('galleryNext').onclick=()=>stepGallery(1);
+let galleryTouchX=0;
+$('galleryPhoto').addEventListener('touchstart',e=>{galleryTouchX=e.touches[0].clientX},{passive:true});
+$('galleryPhoto').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-galleryTouchX;if(Math.abs(dx)>45)stepGallery(dx<0?1:-1)},{passive:true});
+
 function openGalleryDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open('mooni-gallery',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('photos'))req.result.createObjectStore('photos',{keyPath:'id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 async function saveGalleryItem(item){const db=await openGalleryDB();await new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put(item);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
