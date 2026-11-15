@@ -65,14 +65,14 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
  <button class="ratio" data-ratio="full" aria-pressed="false">FULL</button>
 </div>
 <div class="caption" id="caption">Màu gốc, giữ nguyên chất ảnh camera.</div>
-<div class="controls"><button class="round" id="last" aria-label="Ảnh vừa chụp">▧</button><button class="shutter" id="capture" aria-label="Chụp ảnh"></button><button class="round" id="flip2" aria-label="Đổi camera">⟳</button></div>
+<div class="controls"><button class="round" id="last" aria-label="Ảnh vừa chụp">▧</button><button class="shutter" id="capture" aria-label="Chụp ảnh"></button><button class="round" id="flashToggle" aria-label="Bật đèn flash" aria-pressed="false">⚡</button><button class="round" id="flip2" aria-label="Đổi camera">⟳</button></div>
 <div class="status" id="status">MOONI · bản thử nghiệm miễn phí</div>
 <section id="result"><img id="photo" alt="Ảnh vừa chụp"><div class="actions"><a class="action" id="save" download="mooni-photo.jpg">Lưu ảnh</a><button class="action" id="again">Chụp tiếp</button></div></section>
 <footer>MADE OF LITTLE MOMENTS · MOONI</footer></div>
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,ratio='4:3';
+let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,ratio='4:3',torchOn=false,torchSupported=false;
 const looks={
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
@@ -88,6 +88,19 @@ const looks={
  vivid:{css:'saturate(1.28) contrast(1.13) brightness(1.02)',grain:0,caption:'Màu nổi bật, xanh biển và cây lá rực rỡ.'}
 };
 function say(t){$('status').textContent=t}
+async function setTorch(on){
+ const track=stream?.getVideoTracks()[0];
+ const caps=track?.getCapabilities?track.getCapabilities():{};
+ torchSupported=!!caps.torch;
+ if(!track||!torchSupported){torchOn=false;$('flashToggle').setAttribute('aria-pressed','false');say('iPhone/Safari hiện không hỗ trợ điều khiển đèn flash trong camera web.');return}
+ try{
+  await track.applyConstraints({advanced:[{torch:on}]});
+  torchOn=on;$('flashToggle').setAttribute('aria-pressed',String(on));
+  $('flashToggle').style.background=on?'#e8c98b':'#fff9';
+  say(on?'Đèn flash đang bật':'Đèn flash đã tắt');
+ }catch(e){torchOn=false;$('flashToggle').setAttribute('aria-pressed','false');say('Không bật được đèn flash trên camera này.')}
+}
+$('flashToggle').addEventListener('click',()=>setTorch(!torchOn));
 function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===name)));video.style.filter=looks[name].css;$('caption').textContent=looks[name].caption}
 document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.f)));
 async function startCamera(){
@@ -96,7 +109,7 @@ async function startCamera(){
  stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:2560}}});
  video.srcObject=stream;video.classList.toggle('selfie-preview',facing==='user');await video.play();$('placeholder').style.display='none';
  const track=stream.getVideoTracks()[0],caps=track.getCapabilities?track.getCapabilities():{};
- nativeZoom=!!(caps.zoom&&typeof caps.zoom.max==='number'&&caps.zoom.max>1);
+ nativeZoom=!!(caps.zoom&&typeof caps.zoom.max==='number'&&caps.zoom.max>1);torchSupported=!!caps.torch;torchOn=false;$('flashToggle').setAttribute('aria-pressed','false');$('flashToggle').style.background='#fff9';$('flashToggle').style.opacity=torchSupported?'1':'.55';$('flashToggle').title=torchSupported?'Bật/tắt đèn flash':'Thiết bị/trình duyệt không hỗ trợ đèn flash trong web camera';
  const z=$('zoom');z.max=nativeZoom?Math.min(5,caps.zoom.max):3;z.min=nativeZoom?Math.max(1,caps.zoom.min||1):1;z.value=1;zoom=1;updateZoom();
  say((facing==='user'?'Camera trước':'Camera sau')+' đang bật · '+video.videoWidth+'×'+video.videoHeight);
  }catch(e){$('placeholder').innerHTML='MOONI<br><small>Hãy cho phép camera trong Safari rồi tải lại trang nhé.</small>';say('Chưa mở được camera. Hãy kiểm tra quyền Camera của Safari.')}
@@ -118,7 +131,7 @@ function setRatio(value){
  stage.style.aspectRatio=map[value].ar;stage.style.width=map[value].width;
 }
 document.querySelectorAll('.ratio').forEach(b=>b.addEventListener('click',()=>setRatio(b.dataset.ratio)));
-function flip(){facing=facing==='environment'?'user':'environment';startCamera()}
+function flip(){if(torchOn)setTorch(false);facing=facing==='environment'?'user':'environment';startCamera()}
 $('flip2').onclick=flip;
 $('capture').onclick=()=>{
  if(!stream||!video.videoWidth){say('Hãy bật camera trước nhé.');return}
