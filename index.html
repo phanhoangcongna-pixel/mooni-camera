@@ -183,11 +183,6 @@ function setRatio(value){
  stage.dataset.ratio=value;
  // Keep the camera viewport and all controls fixed; only the captured crop changes.
 }
-document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
- const stage=document.querySelector('.stage');
- const map={'4:3':{ar:'3/4',width:'100%'},'16:9':{ar:'9/16',width:'100%'},'1:1':{ar:'1/1',width:'min(100%, 56svh)'},'full':{ar:'9/19.5',width:'min(100%, 29svh)'}};
- stage.style.aspectRatio=map[value].ar;stage.style.width=map[value].width;stage.style.maxHeight='none';
-}
 document.querySelectorAll('.ratio').forEach(b=>b.addEventListener('click',()=>setRatio(b.dataset.ratio)));
 function flip(){if(torchOn)setTorch(false);facing=facing==='environment'?'user':'environment';startCamera()}
 $('flip2').onclick=flip;
