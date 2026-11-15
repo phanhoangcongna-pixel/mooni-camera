@@ -1,27 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 <defs>
- <linearGradient id="shell" x2="0" y2="1"><stop stop-color="#f4f3ee"/><stop offset=".55" stop-color="#c9cbc5"/><stop offset="1" stop-color="#858d89"/></linearGradient>
- <linearGradient id="panel" x2="0" y2="1"><stop stop-color="#293a38"/><stop offset="1" stop-color="#172321"/></linearGradient>
- <radialGradient id="glass" cx="34%" cy="25%" r="78%"><stop stop-color="#9fc6b6"/><stop offset=".22" stop-color="#477b70"/><stop offset=".52" stop-color="#1d3d39"/><stop offset="1" stop-color="#091412"/></radialGradient>
- <linearGradient id="glint" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".9"/><stop offset=".5" stop-color="#9bd4c0" stop-opacity=".25"/><stop offset="1" stop-color="#d5c49c" stop-opacity=".6"/></linearGradient>
- <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="10"/></filter>
+ <linearGradient id="ivory" x2="0" y2="1"><stop stop-color="#fffefa"/><stop offset="1" stop-color="#e9e7df"/></linearGradient>
+ <linearGradient id="sage" x2="0" y2="1"><stop stop-color="#65796e"/><stop offset="1" stop-color="#293c35"/></linearGradient>
+ <radialGradient id="lens" cx="34%" cy="27%" r="75%"><stop stop-color="#b9d8c8"/><stop offset=".2" stop-color="#608d7d"/><stop offset=".48" stop-color="#233e36"/><stop offset=".8" stop-color="#101c19"/><stop offset="1" stop-color="#050908"/></radialGradient>
+ <linearGradient id="rim" x2="0" y2="1"><stop stop-color="#fff"/><stop offset=".5" stop-color="#9ba19b"/><stop offset="1" stop-color="#e5e6df"/></linearGradient>
+ <linearGradient id="reflection" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".95"/><stop offset=".45" stop-color="#b8e7d5" stop-opacity=".35"/><stop offset="1" stop-color="#8cbca7" stop-opacity=".05"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12"/></filter>
 </defs>
-<rect width="512" height="512" rx="112" fill="#202b29"/>
-<rect x="48" y="66" width="416" height="390" rx="64" fill="#000" opacity=".35" filter="url(#shadow)"/>
-<rect x="40" y="48" width="432" height="416" rx="68" fill="url(#shell)" stroke="#fff" stroke-opacity=".8" stroke-width="5"/>
-<path d="M42 286H470V396Q470 462 404 462H108Q42 462 42 396Z" fill="url(#panel)"/>
-<path d="M42 286H470" stroke="#73817b" stroke-width="4"/>
-<path d="M50 294H462" stroke="#d7d9d0" stroke-opacity=".28" stroke-width="2" stroke-dasharray="5 6"/>
-
-<rect x="374" y="104" width="53" height="32" rx="16" fill="#34413e" stroke="#9ba49d" stroke-width="4"/>
-<circle cx="256" cy="276" r="145" fill="#66736e" opacity=".55"/>
-<circle cx="256" cy="270" r="137" fill="#dce0da" stroke="#77817c" stroke-width="8"/>
-<circle cx="256" cy="270" r="119" fill="url(#glass)" stroke="#253b36" stroke-width="8"/>
-<circle cx="256" cy="270" r="102" fill="none" stroke="#b4d4c5" stroke-opacity=".4" stroke-width="3"/>
-<circle cx="256" cy="270" r="83" fill="none" stroke="#e2e7d9" stroke-opacity=".2" stroke-width="3"/>
-<path d="M177 215Q205 150 264 168Q220 179 202 238Q191 267 177 215Z" fill="url(#glint)" opacity=".8"/>
-<path d="M308 337Q352 315 365 282Q365 350 314 366Z" fill="#a4cdbb" opacity=".42"/>
-<circle cx="256" cy="270" r="34" fill="#0b1714" opacity=".95"/>
-<circle cx="244" cy="255" r="12" fill="#fff" opacity=".22"/>
-<text x="78" y="119" fill="#344440" font-family="Arial,sans-serif" font-size="42" font-weight="600" letter-spacing="3">MOONI</text>
+<rect width="512" height="512" rx="112" fill="#18231f"/>
+<rect x="45" y="58" width="422" height="400" rx="68" fill="#000" opacity=".3" filter="url(#shadow)"/>
+<rect x="40" y="42" width="432" height="428" rx="68" fill="url(#ivory)" stroke="#fff" stroke-width="5"/>
+<path d="M42 278H470V402Q470 468 404 468H108Q42 468 42 402Z" fill="url(#sage)"/>
+<path d="M42 279H470" stroke="#b6bcb3" stroke-width="4"/>
+<path d="M52 288H460" stroke="#fff" stroke-opacity=".45" stroke-width="2" stroke-dasharray="5 6"/>
+<rect x="379" y="112" width="52" height="32" rx="13" fill="#53645c" stroke="#aeb5ac" stroke-width="4"/>
+<rect x="388" y="119" width="34" height="18" rx="8" fill="#f6f1df" opacity=".85"/>
+<circle cx="256" cy="285" r="151" fill="#1a2823" opacity=".22"/>
+<circle cx="256" cy="278" r="143" fill="url(#rim)" stroke="#89918b" stroke-width="7"/>
+<circle cx="256" cy="278" r="126" fill="#17231f" stroke="#303d37" stroke-width="8"/>
+<circle cx="256" cy="278" r="116" fill="url(#lens)" stroke="#6d7770" stroke-width="3"/>
+<circle cx="256" cy="278" r="99" fill="none" stroke="#b6d3c4" stroke-opacity=".34" stroke-width="3"/>
+<circle cx="256" cy="278" r="80" fill="none" stroke="#dce8df" stroke-opacity=".18" stroke-width="3"/>
+<circle cx="256" cy="278" r="58" fill="none" stroke="#a6c7b5" stroke-opacity=".2" stroke-width="3"/>
+<path d="M160 223Q193 150 266 169Q212 185 194 251Q180 283 160 223Z" fill="url(#reflection)" opacity=".9"/>
+<path d="M301 359Q352 333 368 290Q365 365 308 390Z" fill="#9bd4b7" opacity=".35"/>
+<circle cx="256" cy="278" r="31" fill="#07110e" opacity=".94"/>
+<circle cx="245" cy="263" r="10" fill="#fff" opacity=".2"/>
+<text x="256" y="116" text-anchor="middle" fill="#29352f" font-family="Arial,sans-serif" font-size="43" font-weight="700" letter-spacing="5">MOONI</text>
 </svg>
