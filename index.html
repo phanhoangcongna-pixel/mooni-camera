@@ -19,8 +19,10 @@ header{height:40px;flex:0 0 40px;display:flex;align-items:center;justify-content
 .logo{font:500 16px Georgia,serif;letter-spacing:.42em;padding-left:.42em;color:#f4f1e9}
 .tag{display:none}
 .stage{position:relative;flex:1 1 auto;width:100%;min-height:330px;max-height:calc(100svh - 275px);aspect-ratio:3/4;margin:auto 0 12px;overflow:hidden;border-radius:24px;background:#171614;box-shadow:0 8px 30px #0008;transition:width .18s,aspect-ratio .18s}
-video{width:100%;height:100%;object-fit:cover;display:block}
-video.selfie-preview{transform:scaleX(-1)}
+.live-frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#000}
+.live-frame video{width:100%;height:100%;object-fit:cover;display:block}
+.live-frame video.selfie-preview{transform:scaleX(-1)}
+.stage{transition:none}
 .placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
 .frame-guide{position:absolute;z-index:2;left:27%;top:24%;width:46%;height:52%;border:2px solid #fff;border-radius:22px;pointer-events:none;box-shadow:0 0 0 999px #00000008}
 .frame-label{position:absolute;z-index:3;top:calc(24% - 26px);left:0;right:0;text-align:center;color:white;font-size:12px;font-weight:650;letter-spacing:.04em;text-shadow:0 1px 4px #0009;pointer-events:none}
@@ -64,7 +66,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <body><div class="app">
 <header><div class="logo">MOONI</div><div class="tag">little moments, softly remembered.</div></header>
 <section class="stage">
-<video id="video" autoplay playsinline muted></video>
+<div class="live-frame" id="liveFrame"><video id="video" autoplay playsinline muted></video></div>
 <div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="stage-meta"><span class="meta-chip" id="lensMeta">1×</span><span class="meta-chip" id="exposureMeta">☼ &nbsp; AUTO</span></div>
 </section>
 <nav class="filters" aria-label="Bộ lọc màu">
@@ -172,9 +174,14 @@ function updateZoom(){
 function setRatio(value){
  ratio=value;
  document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
- const stage=document.querySelector('.stage');
+ const stage=document.querySelector('.stage'),frame=$('liveFrame');
  stage.dataset.ratio=value;
- // Keep the camera viewport and all controls fixed; only the captured crop changes.
+ const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
+ const target=ratios[value]||3/4;
+ const boxW=stage.clientWidth,boxH=stage.clientHeight;
+ let w,h;
+ if(boxW/boxH>target){h=boxH;w=h*target}else{w=boxW;h=w/target}
+ frame.style.width=Math.round(w)+'px';frame.style.height=Math.round(h)+'px';
 }
 document.querySelectorAll('.ratio').forEach(b=>b.addEventListener('click',()=>setRatio(b.dataset.ratio)));
 function flip(){if(torchOn)setTorch(false);facing=facing==='environment'?'user':'environment';startCamera()}
@@ -218,6 +225,7 @@ function openGalleryDB(){return new Promise((resolve,reject)=>{const req=indexed
 async function saveGalleryItem(item){const db=await openGalleryDB();await new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put(item);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
+window.addEventListener('resize',()=>setRatio(ratio));
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
  startCamera();
