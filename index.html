@@ -200,16 +200,6 @@ function setRatio(value){
  document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
  updatePreviewFrame();
 }
-document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
- const stage=document.querySelector('.stage'),frame=$('liveFrame');
- stage.dataset.ratio=value;
- const ratios={'4:3':3/4,'16:9':16/9,'1:1':1};
- const target=ratios[value]||3/4;
- const boxW=stage.clientWidth,boxH=stage.clientHeight;
- let w,h;
- if(boxW/boxH>target){h=boxH;w=h*target}else{w=boxW;h=w/target}
- frame.style.width=Math.round(w)+'px';frame.style.height=Math.round(h)+'px';
-}
 document.querySelectorAll('.ratio').forEach(b=>b.addEventListener('click',()=>setRatio(b.dataset.ratio)));
 $('landscapeShot').addEventListener('click',async()=>{if(!landscapeMode){if(facing!=='user'){facing='user';await startCamera()}landscapeMode=true}else{landscapeMode=false}updatePreviewFrame();say(landscapeMode?'Chế độ chụp ngang · camera trước':'Đã trở về khung dọc')});
 
