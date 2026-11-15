@@ -163,6 +163,11 @@ function flip(){if(torchOn)setTorch(false);facing=facing==='environment'?'user':
 $('flip2').onclick=flip;
 $('capture').onclick=()=>{
  if(!stream||!video.videoWidth){say('Hãy bật camera trước nhé.');return}
+ if(timerSeconds){const wait=timerSeconds;timerSeconds=0;$('timerToggle').textContent='◷';$('timerToggle').setAttribute('aria-pressed','false');let left=wait;say('Sẽ chụp sau '+left+' giây');const tick=()=>{left--;if(left>0){say('Còn '+left+' giây…');setTimeout(tick,1000)}else captureNow()};setTimeout(tick,1000);return}
+ captureNow();
+};
+function captureNow(){
+ if(!stream||!video.videoWidth)return;
  const vw=video.videoWidth,vh=video.videoHeight;
  // Use the full camera frame, crop only to the chosen output ratio.
  const ratios={'4:3':3/4,'16:9':9/16,'1:1':1,'full':9/19.5};
