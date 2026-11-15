@@ -1,4 +1,4 @@
-const CACHE='mooni-v36';
+const CACHE='mooni-v37';
 const ASSETS=['./','./index.html','./manifest.webmanifest'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
