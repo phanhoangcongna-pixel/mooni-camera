@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+ <linearGradient id="body" x2="0" y2="1"><stop stop-color="#fffdfa"/><stop offset=".52" stop-color="#f8f0ed"/><stop offset="1" stop-color="#edcbd2"/></linearGradient>
+ <linearGradient id="leather" x2="0" y2="1"><stop stop-color="#f4dce0"/><stop offset="1" stop-color="#e9bdc8"/></linearGradient>
+ <radialGradient id="glass" cx="35%" cy="28%" r="75%"><stop stop-color="#a99bc9"/><stop offset=".28" stop-color="#5d4b70"/><stop offset=".62" stop-color="#211b2b"/><stop offset="1" stop-color="#09090e"/></radialGradient>
+ <linearGradient id="shine" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".85"/><stop offset=".45" stop-color="#e9a9d4" stop-opacity=".2"/><stop offset="1" stop-color="#8e75ba" stop-opacity=".7"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
+</defs>
+<rect width="512" height="512" rx="112" fill="#f7f2ef"/>
+<rect x="44" y="58" width="424" height="396" rx="66" fill="#c9b7b5" opacity=".25" filter="url(#shadow)"/>
+<rect x="40" y="48" width="432" height="416" rx="68" fill="url(#body)" stroke="#fff" stroke-width="5"/>
+<path d="M42 285H470V396Q470 462 404 462H108Q42 462 42 396Z" fill="url(#leather)"/>
+<path d="M42 286H470" stroke="#d9b7be" stroke-width="4"/>
+<path d="M50 294H462" stroke="#fff" stroke-opacity=".65" stroke-width="2" stroke-dasharray="5 5"/>
+<text x="91" y="161" fill="#8c7c7c" font-family="Arial,sans-serif" font-size="48" letter-spacing="3">MOONI</text>
+<path d="M290 105l8 18 18 8-18 8-8 18-8-18-18-8 18-8z" fill="#a58da9"/>
+<rect x="374" y="104" width="53" height="32" rx="16" fill="#e7d9d5" stroke="#cbb9b8" stroke-width="4"/>
+<circle cx="256" cy="276" r="145" fill="#d9c9cb" opacity=".55"/>
+<circle cx="256" cy="270" r="137" fill="#f9f5f4" stroke="#bbaeb2" stroke-width="8"/>
+<circle cx="256" cy="270" r="119" fill="url(#glass)" stroke="#4c414b" stroke-width="8"/>
+<circle cx="256" cy="270" r="102" fill="none" stroke="#b4a2c1" stroke-opacity=".38" stroke-width="3"/>
+<circle cx="256" cy="270" r="83" fill="none" stroke="#dfc4df" stroke-opacity=".22" stroke-width="3"/>
+<path d="M177 215Q205 150 264 168Q220 179 202 238Q191 267 177 215Z" fill="url(#shine)" opacity=".8"/>
+<path d="M308 337Q352 315 365 282Q365 350 314 366Z" fill="#d6a5df" opacity=".45"/>
+<circle cx="256" cy="270" r="34" fill="#17131f" opacity=".9"/>
+<circle cx="244" cy="255" r="12" fill="#fff" opacity=".22"/>
+</svg>
