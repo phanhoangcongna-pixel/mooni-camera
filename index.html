@@ -14,11 +14,11 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .app{max-width:540px;min-height:100svh;margin:auto;padding:env(safe-area-inset-top) 17px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
 header{text-align:center;padding:17px 0 15px}.logo{font:400 26px Georgia,serif;letter-spacing:.34em}.tag{font:italic 11px Georgia,serif;color:var(--muted);margin-top:7px}
-.stage{position:relative;aspect-ratio:3/4;max-height:59svh;overflow:hidden;border-radius:21px;background:#c9c7bd;box-shadow:0 8px 25px #57453820}
+.stage{position:relative;width:100%;aspect-ratio:3/4;max-height:59svh;overflow:hidden;border-radius:21px;background:#c9c7bd;box-shadow:0 8px 25px #57453820;transition:width .18s,aspect-ratio .18s}
 video{width:100%;height:100%;object-fit:cover;display:block}video.selfie-preview{transform:scaleX(-1)}.placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
 .toolbar{position:absolute;z-index:2;top:12px;left:12px;right:12px;display:flex;justify-content:space-between}
 .pill{border:1px solid #ffffff80;background:#241e1a80;color:white;border-radius:30px;padding:9px 13px;font-size:12px;backdrop-filter:blur(8px)}
-.filters{display:flex;gap:10px;overflow-x:auto;padding:17px 1px 12px;scrollbar-width:none}.filters::-webkit-scrollbar{display:none}
+.zoom-panel{padding:7px 5px 2px}.zoom-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin-bottom:7px}.zoom-head strong{color:var(--ink);font-variant-numeric:tabular-nums}.zoom-row{display:flex;align-items:center;gap:10px}.zoom-row input{width:100%;accent-color:var(--accent)}.ratios{display:flex;justify-content:center;gap:7px;padding:10px 0 2px}.ratio{border:1px solid var(--line);background:#fff8;color:var(--muted);border-radius:18px;padding:7px 12px;font-size:11px}.ratio[aria-pressed=true]{background:#e9dcd2;color:var(--ink);border-color:var(--accent);font-weight:700}.filters{display:flex;gap:10px;overflow-x:auto;padding:17px 1px 12px;scrollbar-width:none}.filters::-webkit-scrollbar{display:none}
 .filter{flex:0 0 75px;border:0;background:none;color:var(--muted);font-size:10px;letter-spacing:.04em;padding:0}
 .swatch{height:49px;border-radius:14px;margin-bottom:7px;border:2px solid transparent;box-shadow:inset 0 0 0 1px #fff8}
 .filter[aria-pressed=true]{color:var(--ink);font-weight:700}.filter[aria-pressed=true] .swatch{border-color:var(--accent)}
@@ -48,7 +48,23 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <button class="filter" data-f="green" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#304c36,#aab58b)"></div>GREEN</button>
 <button class="filter" data-f="flash" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#79583e,#e5c69c)"></div>FLASH</button>
 <button class="filter" data-f="softfilm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#c2a990,#e9ddcc)"></div>SOFT FILM</button>
+<button class="filter" data-f="clear" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#d7d8ce,#9eb5ad)"></div>CLEAR</button>
+<button class="filter" data-f="retro" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#a97851,#e2c69c)"></div>RETRO</button>
+<button class="filter" data-f="cool" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#668b9e,#d2d8d7)"></div>COOL</button>
+<button class="filter" data-f="peach" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#d99c8c,#f0d4c4)"></div>PEACH</button>
+<button class="filter" data-f="mono" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#333,#d8d4ce)"></div>MONO</button>
+<button class="filter" data-f="vivid" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#177b80,#e5b77c)"></div>VIVID</button>
 </nav>
+<div class="zoom-panel">
+ <div class="zoom-head"><span>ZOOM</span><strong id="zoomValue">1.0×</strong></div>
+ <div class="zoom-row"><span style="font-size:11px;color:var(--muted)">1×</span><input id="zoom" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom camera"><span style="font-size:11px;color:var(--muted)">3×</span></div>
+</div>
+<div class="ratios" aria-label="Tỷ lệ ảnh">
+ <button class="ratio" data-ratio="4:3" aria-pressed="true">4:3</button>
+ <button class="ratio" data-ratio="16:9" aria-pressed="false">16:9</button>
+ <button class="ratio" data-ratio="1:1" aria-pressed="false">1:1</button>
+ <button class="ratio" data-ratio="full" aria-pressed="false">FULL</button>
+</div>
 <div class="caption" id="caption">Màu gốc, giữ nguyên chất ảnh camera.</div>
 <div class="controls"><button class="round" id="last" aria-label="Ảnh vừa chụp">▧</button><button class="shutter" id="capture" aria-label="Chụp ảnh"></button><button class="round" id="flip2" aria-label="Đổi camera">⟳</button></div>
 <div class="status" id="status">MOONI · bản thử nghiệm miễn phí</div>
@@ -57,14 +73,20 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null;
+let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,ratio='4:3';
 const looks={
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
  sunny:{css:'saturate(1.08) contrast(1.08) sepia(.10) brightness(1.025)',grain:0,caption:'Ánh nắng ấm, da tự nhiên và màu film compact.'},
  green:{css:'saturate(1.12) contrast(1.16) brightness(.985) hue-rotate(-4deg)',grain:0,caption:'Xanh lá trầm, bóng đổ sâu, giữ chi tiết.'},
  flash:{css:'saturate(1.02) contrast(1.20) brightness(1.015)',grain:0,caption:'Tương phản kiểu máy ảnh du lịch, không làm mịn da.'},
- softfilm:{css:'saturate(.94) contrast(1.02) sepia(.07) brightness(1.015)',grain:1.4,caption:'Màu film nhẹ cùng chút grain cực tinh tế.'}
+ softfilm:{css:'saturate(.94) contrast(1.02) sepia(.07) brightness(1.015)',grain:1.4,caption:'Màu film nhẹ cùng chút grain cực tinh tế.'},
+ clear:{css:'saturate(1.02) contrast(1.07) brightness(1.035)',grain:0,caption:'Trong trẻo, sáng sạch và giữ chi tiết tự nhiên.'},
+ retro:{css:'sepia(.18) saturate(1.16) contrast(1.12) brightness(1.01)',grain:0,caption:'Tông compact ấm, hoài niệm nhưng vẫn sắc nét.'},
+ cool:{css:'saturate(.96) contrast(1.08) brightness(1.03) hue-rotate(7deg)',grain:0,caption:'Tông lạnh nhẹ, xanh trong và sạch.'},
+ peach:{css:'sepia(.10) saturate(1.08) contrast(1.02) brightness(1.04) hue-rotate(-7deg)',grain:0,caption:'Hồng đào dịu, da ấm và sáng.'},
+ mono:{css:'grayscale(1) contrast(1.12)',grain:0,caption:'Đen trắng có chiều sâu, giữ chi tiết.'},
+ vivid:{css:'saturate(1.28) contrast(1.13) brightness(1.02)',grain:0,caption:'Màu nổi bật, xanh biển và cây lá rực rỡ.'}
 };
 function say(t){$('status').textContent=t}
 function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===name)));video.style.filter=looks[name].css;$('caption').textContent=looks[name].caption}
@@ -73,19 +95,47 @@ async function startCamera(){
  if(!navigator.mediaDevices?.getUserMedia){say('Camera cần trang HTTPS. Hãy mở bằng Safari trên iPhone.');return}
  try{if(stream)stream.getTracks().forEach(t=>t.stop());
  stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:2560}}});
- video.srcObject=stream;video.classList.toggle('selfie-preview',facing==='user');await video.play();$('placeholder').style.display='none';say(facing==='user'?'Camera trước đang bật':'Camera sau đang bật');
+ video.srcObject=stream;video.classList.toggle('selfie-preview',facing==='user');await video.play();$('placeholder').style.display='none';
+ const track=stream.getVideoTracks()[0],caps=track.getCapabilities?track.getCapabilities():{};
+ nativeZoom=!!(caps.zoom&&typeof caps.zoom.max==='number'&&caps.zoom.max>1);
+ const z=$('zoom');z.max=nativeZoom?Math.min(5,caps.zoom.max):3;z.min=nativeZoom?Math.max(1,caps.zoom.min||1):1;z.value=1;zoom=1;updateZoom();
+ say((facing==='user'?'Camera trước':'Camera sau')+' đang bật · '+video.videoWidth+'×'+video.videoHeight);
  }catch(e){say('Chưa mở được camera. Hãy cấp quyền Camera cho Safari.')}
 }
+function updateZoom(){
+ $('zoomValue').textContent=zoom.toFixed(1)+'×';
+ $('zoom').value=zoom;
+ video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
+}
+async function setZoom(value){
+ zoom=Number(value);updateZoom();
+ if(nativeZoom&&stream){try{await stream.getVideoTracks()[0].applyConstraints({advanced:[{zoom}]})}catch(e){nativeZoom=false;updateZoom();say('Zoom số đang dùng · độ nét phụ thuộc camera')}}
+}
+$('zoom').addEventListener('input',e=>setZoom(e.target.value));
+function setRatio(value){
+ ratio=value;document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
+ const stage=document.querySelector('.stage');
+ const map={'4:3':{ar:'3/4',width:'100%'},'16:9':{ar:'9/16',width:'100%'},'1:1':{ar:'1/1',width:'min(100%, 59svh)'},'full':{ar:'9/19.5',width:'min(100%, 27.2svh)'}};
+ stage.style.aspectRatio=map[value].ar;stage.style.width=map[value].width;
+}
+document.querySelectorAll('.ratio').forEach(b=>b.addEventListener('click',()=>setRatio(b.dataset.ratio)));
 function flip(){facing=facing==='environment'?'user':'environment';startCamera()}
 $('start').onclick=startCamera;$('flip').onclick=flip;$('flip2').onclick=flip;
 $('capture').onclick=()=>{
  if(!stream||!video.videoWidth){say('Hãy bật camera trước nhé.');return}
- const w=video.videoWidth,h=video.videoHeight;canvas.width=w;canvas.height=h;
- ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css;ctx.drawImage(video,0,0,w,h);ctx.restore();ctx.filter='none';
+ const vw=video.videoWidth,vh=video.videoHeight;
+ // Use the full camera frame, crop only to the chosen output ratio.
+ const ratios={'4:3':3/4,'16:9':9/16,'1:1':1,'full':9/19.5};
+ const target=ratios[ratio];let sx=0,sy=0,sw=vw,sh=vh;
+ if(sw/sh>target){sw=sh*target;sx=(vw-sw)/2}else{sh=sw/target;sy=(vh-sh)/2}
+ // When native lens zoom is unavailable, emulate zoom by cropping the sensor frame.
+ if(!nativeZoom&&zoom>1){sw/=zoom;sh/=zoom;sx+=(vw/zoom-sw)/2;sy+=(vh/zoom-sh)/2}
+ const w=Math.round(sw),h=Math.round(sh);canvas.width=w;canvas.height=h;
+ ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css;ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();ctx.filter='none';
  const amount=looks[filter].grain;if(amount){const im=ctx.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){let n=(Math.random()-.5)*amount;d[i]+=n;d[i+1]+=n;d[i+2]+=n}ctx.putImageData(im,0,0)}
  canvas.toBlob(blob=>{if(!blob){say('Lỗi tạo ảnh, thử lại nhé.');return}if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(blob);$('photo').src=lastUrl;$('save').href=lastUrl;$('result').style.display='block';say('Ảnh đã chụp · nhấn Lưu ảnh để lưu về iPhone')},'image/jpeg',.97)
 };
 $('again').onclick=()=>$('result').style.display='none';
 $('last').onclick=()=>{if(lastUrl){$('result').style.display='block'}else say('Ảnh vừa chụp sẽ xuất hiện ở đây.')};
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+setRatio('4:3');if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script></body></html>
