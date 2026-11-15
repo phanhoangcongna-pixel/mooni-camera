@@ -20,7 +20,7 @@ header{height:40px;flex:0 0 40px;display:flex;align-items:center;justify-content
 .tag{display:none}
 .stage{position:relative;flex:1 1 auto;width:100%;min-height:330px;max-height:calc(100svh - 275px);aspect-ratio:3/4;margin:auto 0 12px;overflow:hidden;border-radius:24px;background:#171614;box-shadow:0 8px 30px #0008;transition:width .18s,aspect-ratio .18s}
 .live-frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#000}
-.live-frame video{width:100%;height:100%;object-fit:contain;display:block}
+.live-frame video{width:100%;height:100%;object-fit:cover;display:block}
 .live-frame video.selfie-preview{transform:scaleX(-1)}
 .stage{transition:none}
 .placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
@@ -140,10 +140,10 @@ async function startCamera(){
   if(stream)stream.getTracks().forEach(t=>t.stop());
   const request={audio:false,video:{
    facingMode:{ideal:facing},
-   width:{ideal:1080},
-   height:{ideal:1920},
-   aspectRatio:{ideal:0.75},
-   frameRate:{ideal:30,max:30}
+   width:{ideal:3840},
+   height:{ideal:2160},
+   aspectRatio:{ideal:16/9},
+   frameRate:{ideal:30,max:60}
   }};
   stream=await navigator.mediaDevices.getUserMedia(request);
   video.srcObject=stream;
@@ -163,7 +163,9 @@ async function startCamera(){
   if(advanced.length){try{await track.applyConstraints({advanced})}catch(e){}}
   zoomCaps=caps.zoom||null;
   nativeZoom=!!(zoomCaps&&typeof zoomCaps.max==='number'&&zoomCaps.max>=1.5&&(zoomCaps.min||1)<=1.05);
-  zoom=1;updateZoom();
+  zoom=1;
+  if(nativeZoom){try{await track.applyConstraints({advanced:[{zoom:Math.max(zoomCaps.min||1,1)}]})}catch(e){nativeZoom=false}}
+  updateZoom();
   torchSupported=!!caps.torch;torchOn=false;
   $('flashToggle').setAttribute('aria-pressed','false');
   $('flashToggle').style.background='transparent';
@@ -188,7 +190,7 @@ function setRatio(value){
  document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
  const stage=document.querySelector('.stage'),frame=$('liveFrame');
  stage.dataset.ratio=value;
- const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
+ const ratios={'4:3':3/4,'16:9':16/9,'1:1':1};
  const target=ratios[value]||3/4;
  const boxW=stage.clientWidth,boxH=stage.clientHeight;
  let w,h;
@@ -217,7 +219,7 @@ function captureNow(){
  if(!stream||!video.videoWidth)return;
  const vw=video.videoWidth,vh=video.videoHeight;
  // Use the full camera frame, crop only to the chosen output ratio.
- const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
+ const ratios={'4:3':3/4,'16:9':16/9,'1:1':1};
  const target=ratios[ratio];let sx=0,sy=0,sw=vw,sh=vh;
  if(sw/sh>target){sw=sh*target;sx=(vw-sw)/2}else{sh=sw/target;sy=(vh-sh)/2}
  // Match the live digital zoom by cropping the captured frame.
