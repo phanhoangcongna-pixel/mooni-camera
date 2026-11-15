@@ -138,7 +138,12 @@ async function startCamera(){
  say('Đang yêu cầu quyền camera…');
  try{
   if(stream)stream.getTracks().forEach(t=>t.stop());
-  const request={audio:false,video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:1920}}};
+  const request={audio:false,video:{
+   facingMode:{ideal:facing},
+   width:{ideal:2160},
+   height:{ideal:3840},
+   frameRate:{ideal:30,max:60}
+  }};
   stream=await navigator.mediaDevices.getUserMedia(request);
   video.srcObject=stream;
   video.classList.toggle('selfie-preview',facing==='user');
@@ -146,9 +151,15 @@ async function startCamera(){
   video.play().catch(()=>{say('Camera đã kết nối. Chạm vào khung ảnh nếu chưa thấy hình.');});
   video.onloadedmetadata=()=>{
    $('placeholder').style.display='none';
-   say((facing==='user'?'Camera trước':'Camera sau')+' đang bật · '+video.videoWidth+'×'+video.videoHeight);
+   say((facing==='user'?'Camera trước':'Camera sau')+' · '+video.videoWidth+'×'+video.videoHeight+' · chất lượng tối đa thiết bị cho phép');
   };
   const track=stream.getVideoTracks()[0],caps=track.getCapabilities?track.getCapabilities():{};
+  // Ask supported devices for continuous autofocus/exposure/white balance.
+  const advanced=[];
+  for(const key of ['focusMode','exposureMode','whiteBalanceMode']){
+   if(caps[key]&&Array.isArray(caps[key])&&caps[key].includes('continuous'))advanced.push({[key]:'continuous'});
+  }
+  if(advanced.length){try{await track.applyConstraints({advanced})}catch(e){}}
   nativeZoom=!!(caps.zoom&&typeof caps.zoom.max==='number'&&caps.zoom.max>1);
   torchSupported=!!caps.torch;torchOn=false;
   $('flashToggle').setAttribute('aria-pressed','false');
@@ -212,7 +223,7 @@ function captureNow(){
    lastUrl=URL.createObjectURL(blob);
    say('Đã tự động lưu ảnh vào thư viện MOONI');
   }catch(e){say('Không lưu được ảnh vào thư viện. Kiểm tra dung lượng iPhone nhé.')}
- },'image/jpeg',.97)
+ },'image/jpeg',1)
 };
 $('last').onclick=async()=>{await refreshGallery();$('gallery').classList.add('open')};
 $('closeGallery').onclick=()=>{$('gallery').classList.remove('open');$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid'};
