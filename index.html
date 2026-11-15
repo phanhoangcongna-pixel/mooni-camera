@@ -133,14 +133,37 @@ function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b
 document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.f)));
 async function startCamera(){
  if(!navigator.mediaDevices?.getUserMedia){say('Camera cần trang HTTPS. Hãy mở bằng Safari trên iPhone.');return}
- try{if(stream)stream.getTracks().forEach(t=>t.stop());
- stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:2560}}});
- video.srcObject=stream;video.classList.toggle('selfie-preview',facing==='user');await video.play();$('placeholder').style.display='none';
- const track=stream.getVideoTracks()[0],caps=track.getCapabilities?track.getCapabilities():{};
- nativeZoom=!!(caps.zoom&&typeof caps.zoom.max==='number'&&caps.zoom.max>1);torchSupported=!!caps.torch;torchOn=false;$('flashToggle').setAttribute('aria-pressed','false');$('flashToggle').style.background='#fff9';$('flashToggle').style.opacity=torchSupported?'1':'.55';$('flashToggle').title=torchSupported?'Bật/tắt đèn flash':'Thiết bị/trình duyệt không hỗ trợ đèn flash trong web camera';
- const z=$('zoom');zoom=1.325;focal=53;updateZoom();if(nativeZoom){const desired=Math.min(caps.zoom.max,Math.max(caps.zoom.min||1,zoom));zoom=desired;updateZoom();try{await track.applyConstraints({advanced:[{zoom}]})}catch(e){nativeZoom=false;updateZoom()}}
- say((facing==='user'?'Camera trước':'Camera sau')+' đang bật · '+video.videoWidth+'×'+video.videoHeight);
- }catch(e){$('placeholder').innerHTML='MOONI<br><small>Hãy cho phép camera trong Safari rồi tải lại trang nhé.</small>';say('Chưa mở được camera. Hãy kiểm tra quyền Camera của Safari.')}
+ say('Đang yêu cầu quyền camera…');
+ try{
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  const request={audio:false,video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:1920}}};
+  stream=await navigator.mediaDevices.getUserMedia(request);
+  video.srcObject=stream;
+  video.classList.toggle('selfie-preview',facing==='user');
+  $('placeholder').style.display='none';
+  video.play().catch(()=>{say('Camera đã kết nối. Chạm vào khung ảnh nếu chưa thấy hình.');});
+  video.onloadedmetadata=()=>{
+   $('placeholder').style.display='none';
+   say((facing==='user'?'Camera trước':'Camera sau')+' đang bật · '+video.videoWidth+'×'+video.videoHeight);
+  };
+  const track=stream.getVideoTracks()[0],caps=track.getCapabilities?track.getCapabilities():{};
+  nativeZoom=!!(caps.zoom&&typeof caps.zoom.max==='number'&&caps.zoom.max>1);
+  torchSupported=!!caps.torch;torchOn=false;
+  $('flashToggle').setAttribute('aria-pressed','false');
+  $('flashToggle').style.background='transparent';
+  $('flashToggle').style.opacity=torchSupported?'1':'.55';
+  $('flashToggle').title=torchSupported?'Bật/tắt đèn flash':'Thiết bị/trình duyệt không hỗ trợ đèn flash trong web camera';
+  zoom=1.325;focal=53;updateZoom();
+  if(nativeZoom){
+   const desired=Math.min(caps.zoom.max,Math.max(caps.zoom.min||1,zoom));
+   zoom=desired;updateZoom();
+   try{await track.applyConstraints({advanced:[{zoom}]})}catch(e){nativeZoom=false;updateZoom()}
+  }
+ }catch(e){
+  $('placeholder').innerHTML='MOONI<br><small>Không mở được camera. Kiểm tra quyền Camera trong Cài đặt iPhone → Safari.</small>';
+  $('placeholder').style.display='grid';
+  say('Lỗi camera: '+(e.name||'không xác định')+'. Hãy kiểm tra quyền truy cập.');
+ }
 }
 function updateZoom(){
  $('zoomValue').textContent=focal+'mm';
