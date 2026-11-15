@@ -74,6 +74,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <button class="filter" data-f="street" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#172a2a,#8e7964)"></div>STREET</button>
 <button class="filter" data-f="streetbeauty" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#182a2a,#b58d79)"></div>STREET BEAUTY</button>
 <button class="filter" data-f="forest" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#172b27,#91b5b0 55%,#e2e4d5)"></div>FOREST</button>
+<button class="filter" data-f="forestfair" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#18332c,#b5c9b5 55%,#f1e9dc)"></div>FOREST FAIR</button>
 <button class="filter" data-f="cafe" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#100e0c,#795333 58%,#d8b77c)"></div>CAFE</button>
 <button class="filter" data-f="coast" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#168b9b,#c1d2bb)"></div>COAST</button>
 <button class="filter" data-f="seafilm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#72b9cc,#2d9eaa 55%,#e5d9bc)"></div>SEA FILM</button>
@@ -109,6 +110,7 @@ let stream=null,facing='environment',filter='original',lastUrl=null,galleryIndex
 const looks={
  street:{css:'contrast(1.18) saturate(.88) brightness(.94) sepia(.06)',grain:0,caption:'Street tone · đen sâu, màu trầm lạnh, da và ánh đèn ấm, nét rõ.'},
  forest:{css:'contrast(1.18) saturate(.92) brightness(1.035) hue-rotate(-7deg)',grain:0,caption:'Forest · xanh lá trầm, vùng sáng ngả cyan nhẹ, trắng sạch, tương phản sâu và chi tiết rõ.'},
+ forestfair:{css:'contrast(1.14) saturate(.91) brightness(1.075) hue-rotate(-7deg)',grain:0,caption:'Forest Fair · xanh lá trầm và ánh sáng trong như Forest, da được nâng sáng nhẹ, bớt đỏ và giữ sắc da tự nhiên.'},
  cafe:{css:'contrast(1.24) saturate(.88) brightness(.91) sepia(.13) hue-rotate(-4deg)',grain:0,caption:'Cafe · đen sâu kiểu ảnh chụp đèn flash, gỗ nâu hổ phách, màu xanh dịu và điểm đỏ nổi vừa đủ.'},
  streetbeauty:{css:'contrast(1.12) saturate(.92) brightness(1.015) sepia(.045)',grain:0,caption:'Street Beauty · da mịn hơn, giảm sần và giữ nét khuôn mặt.'},
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
@@ -329,6 +331,25 @@ function captureNow(){
    g+=highlight*.018+green*.012;
    b+=highlight*.035+shadow*.026;
    d[i]=Math.max(0,Math.min(255,r*255));d[i+1]=Math.max(0,Math.min(255,g*255));d[i+2]=Math.max(0,Math.min(255,b*255));
+  }
+  ctx.putImageData(im,0,0);
+ }
+ if(filter==='forestfair'){
+  // Lift likely skin tones selectively while preserving the forest palette.
+  const im=ctx.getImageData(0,0,w,h),d=im.data;
+  for(let i=0;i<d.length;i+=4){
+   let r=d[i],g=d[i+1],bl=d[i+2];
+   const cb=128-0.168736*r-0.331264*g+0.5*bl;
+   const cr=128+0.5*r-0.418688*g-0.081312*bl;
+   const skin=(cr>125&&cr<190&&cb>65&&cb<150&&r>g*.88&&g>bl*.82&&r>70&&g>38);
+   if(skin){
+    const lift=1.10;
+    const y=.2126*r+.7152*g+.0722*bl;
+    r=y+(r-y)*.88;g=y+(g-y)*.88;bl=y+(bl-y)*.88;
+    d[i]=Math.min(255,r*lift+3);
+    d[i+1]=Math.min(255,g*lift+3);
+    d[i+2]=Math.min(255,bl*lift+3);
+   }
   }
   ctx.putImageData(im,0,0);
  }
