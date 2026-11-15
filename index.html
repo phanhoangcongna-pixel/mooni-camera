@@ -144,7 +144,7 @@ async function startCamera(){
    facingMode:{ideal:facing},
    width:{ideal:3840},
    height:{ideal:2160},
-   aspectRatio:{ideal:16/9},
+   aspectRatio:{ideal:landscapeMode&&facing==='user'?16/9:9/16},
    frameRate:{ideal:30,max:60}
   }};
   stream=await navigator.mediaDevices.getUserMedia(request);
@@ -164,9 +164,9 @@ async function startCamera(){
   }
   if(advanced.length){try{await track.applyConstraints({advanced})}catch(e){}}
   zoomCaps=caps.zoom||null;
-  nativeZoom=!!(zoomCaps&&typeof zoomCaps.max==='number'&&zoomCaps.max>=1.5&&(zoomCaps.min||1)<=1.05);
-  zoom=1;
-  if(nativeZoom){try{await track.applyConstraints({advanced:[{zoom:Math.max(zoomCaps.min||1,1)}]})}catch(e){nativeZoom=false}}
+  nativeZoom=!!(zoomCaps&&typeof zoomCaps.max==='number'&&typeof zoomCaps.min==='number'&&zoomCaps.max>zoomCaps.min);
+  zoom=landscapeMode&&facing==='user'&&nativeZoom&&zoomCaps.min<1?zoomCaps.min:1;
+  if(nativeZoom){try{await track.applyConstraints({advanced:[{zoom:Math.min(zoomCaps.max,Math.max(zoomCaps.min,zoom))}]})}catch(e){nativeZoom=false;zoom=1}}
   updateZoom();
   torchSupported=!!caps.torch;torchOn=false;
   $('flashToggle').setAttribute('aria-pressed','false');
@@ -181,10 +181,10 @@ async function startCamera(){
 }
 function updateZoom(){
  const track=stream?.getVideoTracks()[0];
- if(nativeZoom&&track&&zoomCaps){const hardwareZoom=Math.min(zoomCaps.max,Math.max(zoomCaps.min||1,zoom));track.applyConstraints({advanced:[{zoom:hardwareZoom}]}).catch(()=>{nativeZoom=false;updateZoom()});}
+ if(nativeZoom&&track&&zoomCaps){const hardwareZoom=Math.min(zoomCaps.max,Math.max(zoomCaps.min,zoom));track.applyConstraints({advanced:[{zoom:hardwareZoom}]}).catch(()=>{nativeZoom=false;updateZoom()});}
  video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
  $('zoomReset').textContent=zoom.toFixed(1)+'×';
- $('zoomOut').disabled=zoom<=1;
+ $('zoomOut').disabled=zoom<=(nativeZoom?zoomCaps.min:1);
  $('zoomIn').disabled=zoom>=3;
 }
 function updatePreviewFrame(){
@@ -203,7 +203,7 @@ function setRatio(value){
  updatePreviewFrame();
 }
 document.querySelectorAll('.ratio').forEach(b=>b.addEventListener('click',()=>setRatio(b.dataset.ratio)));
-$('landscapeShot').addEventListener('click',async()=>{if(!landscapeMode){if(facing!=='user'){facing='user';await startCamera()}landscapeMode=true}else{landscapeMode=false}updatePreviewFrame();say(landscapeMode?'Chế độ chụp ngang · camera trước':'Đã trở về khung dọc')});
+$('landscapeShot').addEventListener('click',async()=>{if(!landscapeMode){landscapeMode=true;if(facing!=='user'){facing='user'}await startCamera()}else{landscapeMode=false;zoom=1;updateZoom()}updatePreviewFrame();say(landscapeMode?'Chế độ chụp ngang · camera trước':'Đã trở về khung dọc')});
 
 let pinchStart=0,pinchZoom=1;
 const stageEl=document.querySelector('.stage');
