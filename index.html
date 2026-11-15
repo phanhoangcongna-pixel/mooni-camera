@@ -94,6 +94,11 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <button class="filter" data-f="astia" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#b68e82,#ead9c7)"></div>ASTIA</button>
 <button class="filter" data-f="velvia" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#145b58,#e2a65f)"></div>VELVIA</button>
 <button class="filter" data-f="acros" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#171717,#d9d5ce)"></div>ACROS</button>
+<button class="filter" data-f="leicanatural" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#65705c,#d6c8aa)"></div>LEICA NATURAL</button>
+<button class="filter" data-f="leicachrome" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#354b4c,#c8b69a)"></div>LEICA CHROME</button>
+<button class="filter" data-f="leicavivid" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#145e61,#e4a75e)"></div>LEICA VIVID</button>
+<button class="filter" data-f="leicawarm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#855b43,#ead0a9)"></div>LEICA WARM</button>
+<button class="filter" data-f="leicamono" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#171717,#d9d7d1)"></div>LEICA MONO</button>
 </nav>
 <div class="ratio-wrap"><div class="ratio-label">ASPECT RATIO</div><div class="ratios" aria-label="Tỷ lệ ảnh">
  <button class="ratio" data-ratio="4:3" aria-pressed="true">4:3</button>
@@ -138,6 +143,12 @@ const looks={
  astia:{css:'contrast(1.02) saturate(1.06) brightness(1.045) sepia(.045) hue-rotate(-5deg)',grain:0,caption:'Astia inspired · màu mềm, da ấm sáng và màu sắc nhẹ nhàng.'},
  velvia:{css:'saturate(1.42) contrast(1.18) brightness(1.015)',grain:0,caption:'Velvia inspired · màu rực rỡ, xanh trời và cây lá nổi bật, tương phản mạnh.'},
  acros:{css:'grayscale(1) contrast(1.28) brightness(.98)',grain:0,caption:'Acros inspired · đơn sắc đậm, vùng tối sâu và chi tiết rõ.'},
+
+ leicanatural:{css:'contrast(1.10) saturate(.91) brightness(1.015) sepia(.035)',grain:0,caption:'Leica Natural inspired · màu chân thực, da ấm nhẹ, độ tương phản tinh gọn và chi tiết rõ.'},
+ leicachrome:{css:'contrast(1.16) saturate(.83) brightness(.99) sepia(.055) hue-rotate(3deg)',grain:0,caption:'Leica Chrome inspired · màu trầm thanh lịch, xanh dịu, đỏ sâu và chất ảnh đường phố.'},
+ leicavivid:{css:'contrast(1.16) saturate(1.24) brightness(1.015)',grain:0,caption:'Leica Vivid inspired · màu giàu sức sống, đỏ và xanh nổi bật, tương phản rõ.'},
+ leicawarm:{css:'contrast(1.08) saturate(1.02) brightness(1.025) sepia(.14) hue-rotate(-5deg)',grain:0,caption:'Leica Warm inspired · tông vàng mật ong, da ấm, ánh sáng chiều mềm.'},
+ leicamono:{css:'grayscale(1) contrast(1.34) brightness(.97)',grain:0,caption:'Leica Monochrom inspired · đen trắng giàu tương phản, bóng sâu và vùng sáng có chiều sâu.'}
 };
 function say(t){$('status').textContent=t}
 async function setTorch(on){
