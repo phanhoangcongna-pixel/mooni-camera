@@ -28,12 +28,6 @@ video.selfie-preview{transform:scaleX(-1)}
 .meta-chip{background:#161512b8;color:#fff;border:1px solid #ffffff1c;border-radius:30px;padding:9px 13px;font-size:11px;backdrop-filter:blur(12px)}
 .toolbar{position:absolute;z-index:4;top:12px;left:12px;right:12px;display:flex;justify-content:flex-end}
 .pill{border:1px solid #ffffff40;background:#17161480;color:white;border-radius:30px;padding:8px 12px;font-size:11px;backdrop-filter:blur(12px)}
-.zoom-panel{padding:2px 6px 4px}
-.zoom-head{display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#9e9b94;letter-spacing:.16em;margin-bottom:5px}
-.zoom-head strong{color:#f5f2eb;font-size:11px;letter-spacing:0;font-weight:500;font-variant-numeric:tabular-nums}
-.zoom-row{display:flex;align-items:center;gap:10px}
-.zoom-row span{font-size:10px!important;color:#aaa69e!important}
-.lens-choice{border:1px solid #393833;background:#171715;color:#a7a49d;border-radius:22px;padding:8px 16px;font-size:11px;flex:1}.lens-choice.active{background:#f2f0e9;color:#161512;border-color:#f2f0e9;font-weight:650}
 .ratio-wrap{padding:7px 0 5px}
 .ratio-label{font-size:8px;color:#77746e;letter-spacing:.18em;text-align:center;margin-bottom:7px}
 .ratios{display:flex;justify-content:center;gap:3px;padding:3px;background:#191917;border:1px solid #35342f;border-radius:24px;width:min(100%,250px);margin:0 auto}
@@ -213,7 +207,6 @@ function captureNow(){
   }catch(e){say('Không lưu được ảnh vào thư viện. Kiểm tra dung lượng iPhone nhé.')}
  },'image/jpeg',.97)
 };
-$('again').onclick=()=>$('result').style.display='none';
 $('last').onclick=async()=>{await refreshGallery();$('gallery').classList.add('open')};
 $('closeGallery').onclick=()=>{$('gallery').classList.remove('open');$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid'};
 $('galleryBack').onclick=()=>{$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid'};
