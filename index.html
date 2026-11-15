@@ -26,7 +26,7 @@ header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content
 .placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
 .frame-guide{position:absolute;z-index:2;left:27%;top:24%;width:46%;height:52%;border:2px solid #fff;border-radius:22px;pointer-events:none;box-shadow:0 0 0 999px #00000008}
 .frame-label{position:absolute;z-index:3;top:calc(24% - 26px);left:0;right:0;text-align:center;color:white;font-size:12px;font-weight:650;letter-spacing:.04em;text-shadow:0 1px 4px #0009;pointer-events:none}
-.stage-meta{position:absolute;z-index:3;bottom:15px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;pointer-events:auto}
+.exposure-ui{position:absolute;z-index:5;left:50%;top:12px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:7px 11px;border-radius:22px;background:#171614c9;border:1px solid #ffffff38;color:#fff;font-size:12px;backdrop-filter:blur(10px);width:min(220px,75%)}.exposure-ui input{flex:1;min-width:0;accent-color:#fff;height:3px}.focus-ring{position:absolute;z-index:4;width:54px;height:54px;border:1.5px solid #fff;border-radius:50%;display:none;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #0005}.stage-meta{position:absolute;z-index:3;bottom:15px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;pointer-events:auto}
 .meta-chip{background:#161512b8;color:#fff;border:1px solid #ffffff1c;border-radius:30px;padding:9px 13px;font-size:11px;backdrop-filter:blur(12px)}
 .toolbar{position:absolute;z-index:4;top:12px;left:12px;right:12px;display:flex;justify-content:flex-end}.zoom-control{display:flex;align-items:center;gap:2px;padding:4px;background:#171614b8;border:1px solid #ffffff35;border-radius:24px;backdrop-filter:blur(12px)}.zoom-control button{width:34px;height:30px;border:0;border-radius:18px;background:transparent;color:#fff;font-size:17px}.zoom-control button:disabled{opacity:.35}.zoom-control #zoomReset{width:42px;font-size:11px;font-weight:650}
 .pill{border:1px solid #ffffff40;background:#17161480;color:white;border-radius:30px;padding:8px 12px;font-size:11px;backdrop-filter:blur(12px)}
@@ -67,7 +67,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <header><div class="logo">MOONI</div><div class="tag">little moments, softly remembered.</div></header>
 <section class="stage">
 <div class="live-frame" id="liveFrame"><video id="video" autoplay playsinline muted></video></div>
-<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="stage-meta"><div class="zoom-control"><button id="zoomOut" aria-label="Thu nhỏ">−</button><button id="zoomReset" aria-label="Mức zoom hiện tại">1.0×</button><button id="zoomIn" aria-label="Phóng to">+</button></div></div>
+<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="exposure-ui" id="exposureUI"><span>☼</span><input id="exposureSlider" type="range" min="-2" max="2" step="0.1" value="0" aria-label="Điều chỉnh độ sáng"><span id="exposureValue">0</span></div><div class="focus-ring" id="focusRing"></div><div class="stage-meta"><div class="zoom-control"><button id="zoomOut" aria-label="Thu nhỏ">−</button><button id="zoomReset" aria-label="Mức zoom hiện tại">1.0×</button><button id="zoomIn" aria-label="Phóng to">+</button></div></div>
 </section>
 <nav class="filters" aria-label="Bộ lọc màu">
 <button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
@@ -101,7 +101,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
+let stream=null,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[],exposureValue=0,exposureRange=null,focusTimer=null;
 const looks={
  street:{css:'contrast(1.18) saturate(.88) brightness(.94) sepia(.06)',grain:0,caption:'Street tone · đen sâu, màu trầm lạnh, da và ánh đèn ấm, nét rõ.'},
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
@@ -163,6 +163,10 @@ async function startCamera(){
    if(caps[key]&&Array.isArray(caps[key])&&caps[key].includes('continuous'))advanced.push({[key]:'continuous'});
   }
   if(advanced.length){try{await track.applyConstraints({advanced})}catch(e){}}
+  exposureRange=caps.exposureCompensation||null;
+  exposureValue=0;
+  $('exposureSlider').disabled=!exposureRange;
+  $('exposureSlider').min=exposureRange?.min??-2;$('exposureSlider').max=exposureRange?.max??2;$('exposureSlider').step=exposureRange?.step??0.1;$('exposureSlider').value=0;$('exposureValue').textContent=exposureRange?'0':'AUTO';
   zoomCaps=caps.zoom||null;
   nativeZoom=!!(zoomCaps&&typeof zoomCaps.max==='number'&&typeof zoomCaps.min==='number'&&zoomCaps.max>zoomCaps.min);
   zoom=landscapeMode&&facing==='user'&&nativeZoom&&zoomCaps.min<1?zoomCaps.min:1;
@@ -178,6 +182,33 @@ async function startCamera(){
   $('placeholder').style.display='grid';
   say('Lỗi camera: '+(e.name||'không xác định')+'. Hãy kiểm tra quyền truy cập.');
  }
+}
+async function applyExposure(value){
+ const track=stream?.getVideoTracks()[0];
+ if(!track||!exposureRange)return;
+ exposureValue=Math.max(exposureRange.min,Math.min(exposureRange.max,Number(value)));
+ $('exposureSlider').value=exposureValue;
+ $('exposureValue').textContent=(exposureValue>0?'+':'')+exposureValue.toFixed(1);
+ try{await track.applyConstraints({advanced:[{exposureCompensation:exposureValue}]});}
+ catch(e){say('Camera này không hỗ trợ chỉnh phơi sáng trực tiếp.');}
+}
+$('exposureSlider').addEventListener('input',e=>applyExposure(e.target.value));
+stageElTapSetup();
+function stageElTapSetup(){
+ const stage=document.querySelector('.stage');
+ stage.addEventListener('click',async e=>{
+  if(e.target.closest('.stage-meta')||e.target.closest('.exposure-ui')||e.target.closest('.zoom-control'))return;
+  if(e.target.closest('button'))return;
+  const rect=stage.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const ring=$('focusRing');ring.style.left=x+'px';ring.style.top=y+'px';ring.style.display='block';
+  clearTimeout(focusTimer);focusTimer=setTimeout(()=>ring.style.display='none',1200);
+  const track=stream?.getVideoTracks()[0],caps=track?.getCapabilities?.()||{};
+  const advanced=[];
+  if(caps.focusMode?.includes?.('single-shot'))advanced.push({focusMode:'single-shot'});
+  if(caps.exposureMode?.includes?.('single-shot'))advanced.push({exposureMode:'single-shot'});
+  if(advanced.length)try{await track.applyConstraints({advanced})}catch(e){}
+  if(exposureRange){const normalized=1-(y/rect.height);await applyExposure(exposureRange.min+normalized*(exposureRange.max-exposureRange.min));}
+ });
 }
 function updateZoom(){
  const track=stream?.getVideoTracks()[0];
