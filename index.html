@@ -143,7 +143,8 @@ async function setTorch(on){
 $('flashToggle').addEventListener('click',()=>setTorch(!torchOn));
 $('filterToggle').addEventListener('click',()=>{const f=$('filterToggle');const nav=document.querySelector('.filters');nav.style.display=nav.style.display==='none'?'flex':'none';f.setAttribute('aria-pressed',String(nav.style.display==='none'));});
 $('timerToggle').addEventListener('click',()=>{timerSeconds=timerSeconds===0?3:timerSeconds===3?10:0;$('timerToggle').textContent=timerSeconds?String(timerSeconds):'◷';$('timerToggle').setAttribute('aria-pressed',String(!!timerSeconds));say(timerSeconds?'Hẹn giờ '+timerSeconds+' giây':'Đã tắt hẹn giờ');});
-function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===name)));video.style.filter=looks[name].css;$('caption').textContent=looks[name].caption}
+function applyLiveFilter(){const exposure=Math.pow(2,exposureValue/2);video.style.filter=(looks[filter]?.css||'none')+' brightness('+exposure.toFixed(3)+')'}
+function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===name)));applyLiveFilter();$('caption').textContent=looks[name].caption}
 document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.f)));
 async function startCamera(){
  if(!navigator.mediaDevices?.getUserMedia){say('Camera cần trang HTTPS. Hãy mở bằng Safari trên iPhone.');return}
@@ -198,8 +199,7 @@ async function applyExposure(value){
  exposureValue=Math.max(-2,Math.min(2,Number(value)));
  $('exposureSlider').value=exposureValue;
  $('exposureValue').textContent=(exposureValue>0?'+':'')+exposureValue.toFixed(1);
- const brightness=Math.pow(2,exposureValue/2);
- video.style.filter='brightness('+brightness.toFixed(3)+') '+(filter==='streetbeauty'?'contrast(1.04) saturate(.94) brightness(1.015)':'');
+ applyLiveFilter();
  const track=stream?.getVideoTracks()[0];
  if(track&&exposureRange){
   const nativeValue=Math.max(exposureRange.min,Math.min(exposureRange.max,exposureValue));
@@ -244,7 +244,7 @@ function updateZoom(){
  const track=stream?.getVideoTracks()[0];
  if(nativeZoom&&track&&zoomCaps){const hardwareZoom=Math.min(zoomCaps.max,Math.max(zoomCaps.min,zoom));track.applyConstraints({advanced:[{zoom:hardwareZoom}]}).catch(()=>{nativeZoom=false;updateZoom()});}
  video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
- video.style.filter='brightness('+Math.pow(2,exposureValue/2).toFixed(3)+') '+(filter==='streetbeauty'?'contrast(1.04) saturate(.94) brightness(1.015)':'');
+ applyLiveFilter();
  $('zoomReset').textContent=zoom.toFixed(1)+'×';
  $('zoomOut').disabled=zoom<=(nativeZoom?zoomCaps.min:1);
  $('zoomIn').disabled=zoom>=3;
