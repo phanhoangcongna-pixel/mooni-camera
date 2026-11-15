@@ -100,7 +100,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,ratio='4:3',torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
+let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
 const looks={
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
@@ -160,6 +160,8 @@ async function startCamera(){
    if(caps[key]&&Array.isArray(caps[key])&&caps[key].includes('continuous'))advanced.push({[key]:'continuous'});
   }
   if(advanced.length){try{await track.applyConstraints({advanced})}catch(e){}}
+  zoomCaps=caps.zoom||null;
+  nativeZoom=!!(zoomCaps&&typeof zoomCaps.max==='number'&&zoomCaps.max>=1.5&&(zoomCaps.min||1)<=1.05);
   zoom=1;updateZoom();
   torchSupported=!!caps.torch;torchOn=false;
   $('flashToggle').setAttribute('aria-pressed','false');
@@ -173,7 +175,9 @@ async function startCamera(){
  }
 }
 function updateZoom(){
- video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(zoom>1?'scale('+zoom+')':'');
+ const track=stream?.getVideoTracks()[0];
+ if(nativeZoom&&track&&zoomCaps){const hardwareZoom=Math.min(zoomCaps.max,Math.max(zoomCaps.min||1,zoom));track.applyConstraints({advanced:[{zoom:hardwareZoom}]}).catch(()=>{nativeZoom=false;updateZoom()});}
+ video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
  $('zoomReset').textContent=zoom.toFixed(1)+'×';
  $('zoomOut').disabled=zoom<=1;
  $('zoomIn').disabled=zoom>=3;
@@ -216,7 +220,7 @@ function captureNow(){
  const target=ratios[ratio];let sx=0,sy=0,sw=vw,sh=vh;
  if(sw/sh>target){sw=sh*target;sx=(vw-sw)/2}else{sh=sw/target;sy=(vh-sh)/2}
  // Match the live digital zoom by cropping the captured frame.
- if(zoom>1){const baseW=sw,baseH=sh;sw=baseW/zoom;sh=baseH/zoom;sx+=(baseW-sw)/2;sy+=(baseH-sh)/2}
+ if(!nativeZoom&&zoom>1){const baseW=sw,baseH=sh;sw=baseW/zoom;sh=baseH/zoom;sx+=(baseW-sw)/2;sy+=(baseH-sh)/2}
  const w=Math.round(sw),h=Math.round(sh);canvas.width=w;canvas.height=h;
  ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css;ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();ctx.filter='none';
  const amount=looks[filter].grain;if(amount){const im=ctx.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){let n=(Math.random()-.5)*amount;d[i]+=n;d[i+1]+=n;d[i+2]+=n}ctx.putImageData(im,0,0)}
@@ -227,7 +231,7 @@ function captureNow(){
    await saveGalleryItem(item);await refreshGallery();
    if(lastUrl)URL.revokeObjectURL(lastUrl);
    lastUrl=URL.createObjectURL(blob);
-   say('Đã tự động lưu ảnh vào thư viện MOONI');
+   say('Đã lưu ảnh MOONI · '+canvas.width+'×'+canvas.height);
   }catch(e){say('Không lưu được ảnh vào thư viện. Kiểm tra dung lượng iPhone nhé.')}
  },'image/jpeg',1)
 };
