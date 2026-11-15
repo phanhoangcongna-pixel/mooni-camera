@@ -12,7 +12,7 @@
 <path d="M42 286H470V396Q470 462 404 462H108Q42 462 42 396Z" fill="url(#panel)"/>
 <path d="M42 286H470" stroke="#73817b" stroke-width="4"/>
 <path d="M50 294H462" stroke="#d7d9d0" stroke-opacity=".28" stroke-width="2" stroke-dasharray="5 6"/>
-<text x="78" y="119" fill="#344440" font-family="Arial,sans-serif" font-size="42" font-weight="600" letter-spacing="3">MOONI</text>
+
 <rect x="374" y="104" width="53" height="32" rx="16" fill="#34413e" stroke="#9ba49d" stroke-width="4"/>
 <circle cx="256" cy="276" r="145" fill="#66736e" opacity=".55"/>
 <circle cx="256" cy="270" r="137" fill="#dce0da" stroke="#77817c" stroke-width="8"/>
@@ -23,4 +23,5 @@
 <path d="M308 337Q352 315 365 282Q365 350 314 366Z" fill="#a4cdbb" opacity=".42"/>
 <circle cx="256" cy="270" r="34" fill="#0b1714" opacity=".95"/>
 <circle cx="244" cy="255" r="12" fill="#fff" opacity=".22"/>
+<text x="78" y="119" fill="#344440" font-family="Arial,sans-serif" font-size="42" font-weight="600" letter-spacing="3">MOONI</text>
 </svg>
