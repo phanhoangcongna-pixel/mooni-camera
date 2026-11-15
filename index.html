@@ -301,7 +301,7 @@ $('capture').onclick=()=>{
 async function captureNow(){
  if(!stream||!video.videoWidth)return;
  let hardwareFlash=false;
- if(flashEnabled){hardwareFlash=await setTorch(true);if(hardwareFlash)await new Promise(resolve=>setTimeout(resolve,220));else say('Máy không hỗ trợ flash phần cứng trong Safari; ảnh sẽ dùng ánh sáng hiện có.');}
+ if(flashEnabled){hardwareFlash=await setTorch(true);if(hardwareFlash){say('Đèn trợ sáng đang ổn định…');await new Promise(resolve=>setTimeout(resolve,650));}else say('Safari không hỗ trợ đèn flash chớp như Camera iPhone; ảnh dùng phơi sáng tự động.');}
  const vw=video.videoWidth,vh=video.videoHeight;
  // Use the full camera frame, crop only to the chosen output ratio.
  const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
@@ -398,6 +398,20 @@ async function captureNow(){
   ac.filter='brightness('+Math.pow(2,exposureValue/2).toFixed(3)+')';
   ac.drawImage(canvas,0,0);ac.filter='none';
   ctx.clearRect(0,0,w,h);ctx.drawImage(adjusted,0,0);
+ }
+ // Softer highlight roll-off for flash-assisted shots, closer to a natural phone-camera result.
+ if(flashEnabled){
+  const im=ctx.getImageData(0,0,w,h),d=im.data;
+  for(let i=0;i<d.length;i+=4){
+   const y=(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/255;
+   if(y>.58){
+    const t=(y-.58)/.42;
+    const mapped=.58+.42*(1-Math.exp(-1.15*t))/(1-Math.exp(-1.15));
+    const scale=mapped/Math.max(.001,y);
+    d[i]*=scale;d[i+1]*=scale;d[i+2]*=scale;
+   }
+  }
+  ctx.putImageData(im,0,0);
  }
  const amount=looks[filter].grain;if(amount){const im=ctx.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){let n=(Math.random()-.5)*amount;d[i]+=n;d[i+1]+=n;d[i+2]+=n}ctx.putImageData(im,0,0)}
  canvas.toBlob(async blob=>{
