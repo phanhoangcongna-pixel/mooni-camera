@@ -54,7 +54,7 @@ header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content
 .gallery-close{border:0;background:none;color:white;font-size:30px}.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .gallery-thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px;background:#222}
 .gallery-empty{color:#85827b;text-align:center;font:italic 14px Georgia,serif;padding:45px 10px}
-.gallery-preview{display:none;text-align:center}.gallery-preview img{max-width:100%;max-height:68svh;object-fit:contain;border-radius:8px;touch-action:pan-y}.gallery-nav{display:flex;align-items:center;justify-content:center;gap:22px;margin:12px 0 4px}.gallery-nav button{width:42px;height:36px;border:1px solid #45433d;border-radius:20px;background:#191815;color:#fff;font-size:20px}.gallery-count{font-size:11px;color:#aaa8a2;min-width:60px}
+.gallery-preview{display:none;text-align:center}.gallery-preview img{max-width:100%;max-height:68svh;object-fit:contain;border-radius:8px;touch-action:pan-y}.gallery-nav{display:flex;align-items:center;justify-content:center;gap:22px;margin:12px 0 4px}.gallery-nav button{width:42px;height:36px;border:1px solid #45433d;border-radius:20px;background:#191815;color:#fff;font-size:20px}.gallery-count{font-size:11px;color:#aaa8a2;min-width:60px}.delete-action{border-color:#754343;color:#f0aaaa}
 .gallery-actions{display:flex;gap:10px;justify-content:center;margin-top:14px}
 .action{border:1px solid #45433d;border-radius:22px;background:#191815;color:#fff;padding:10px 17px;text-decoration:none;font-size:12px}
 footer{display:none}
@@ -95,7 +95,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <section id="gallery" class="gallery" aria-label="Thư viện ảnh">
  <div class="gallery-head"><span>THƯ VIỆN MOONI</span><button id="closeGallery" class="gallery-close" aria-label="Đóng thư viện">×</button></div>
  <div id="galleryGrid" class="gallery-grid"></div><div id="galleryEmpty" class="gallery-empty">Ảnh chụp sẽ tự động lưu ở đây.</div>
- <div id="galleryPreview" class="gallery-preview"><img id="galleryPhoto" alt="Ảnh trong thư viện"><div class="gallery-nav"><button id="galleryPrev" aria-label="Ảnh trước">‹</button><span class="gallery-count" id="galleryCount">1 / 1</span><button id="galleryNext" aria-label="Ảnh tiếp theo">›</button></div><div class="gallery-actions"><a id="galleryDownload" class="action" download="mooni-photo.jpg">Tải ảnh về iPhone</a><button id="galleryBack" class="action">Quay lại</button></div></div>
+ <div id="galleryPreview" class="gallery-preview"><img id="galleryPhoto" alt="Ảnh trong thư viện"><div class="gallery-nav"><button id="galleryPrev" aria-label="Ảnh trước">‹</button><span class="gallery-count" id="galleryCount">1 / 1</span><button id="galleryNext" aria-label="Ảnh tiếp theo">›</button></div><div class="gallery-actions"><a id="galleryDownload" class="action" download="mooni-photo.jpg">Tải ảnh về iPhone</a><button id="deletePhoto" class="action delete-action">Xóa ảnh</button><button id="galleryBack" class="action">Quay lại</button></div></div>
 </section>
 <footer>MADE OF LITTLE MOMENTS · MOONI</footer></div>
 <canvas id="canvas" hidden></canvas>
@@ -293,6 +293,24 @@ $('galleryPhoto').addEventListener('touchend',e=>{const dx=e.changedTouches[0].c
 
 function openGalleryDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open('mooni-gallery',1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('photos'))req.result.createObjectStore('photos',{keyPath:'id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 async function saveGalleryItem(item){const db=await openGalleryDB();await new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put(item);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}
+async function deleteGalleryItem(id){
+ const db=await openGalleryDB();
+ await new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});
+ db.close();
+}
+$('deletePhoto').onclick=async()=>{
+ const item=galleryItems[galleryIndex];
+ if(!item)return;
+ if(!confirm('Xóa ảnh này khỏi thư viện MOONI?'))return;
+ try{
+  await deleteGalleryItem(item.id);
+  if(galleryViewUrl){URL.revokeObjectURL(galleryViewUrl);galleryViewUrl=null}
+  await refreshGallery();
+  if(galleryItems.length){galleryIndex=Math.min(galleryIndex,galleryItems.length-1);showGalleryPhoto()}
+  else{$('galleryPreview').style.display='none';$('galleryGrid').style.display='none';$('galleryEmpty').style.display='block'}
+  say('Đã xóa ảnh khỏi thư viện MOONI');
+ }catch(e){say('Không xóa được ảnh. Thử lại nhé.')}
+};
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
 window.addEventListener('resize',()=>updatePreviewFrame());
