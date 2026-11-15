@@ -71,6 +71,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 </section>
 <nav class="filters" aria-label="Bộ lọc màu">
 <button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
+<button class="filter" data-f="street" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#172a2a,#8e7964)"></div>STREET</button>
 <button class="filter" data-f="coast" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#168b9b,#c1d2bb)"></div>COAST</button>
 <button class="filter" data-f="sunny" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#b98558,#ead6ae)"></div>SUNNY</button>
 <button class="filter" data-f="green" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#304c36,#aab58b)"></div>GREEN</button>
@@ -102,6 +103,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
 let stream=null,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
 const looks={
+ street:{css:'contrast(1.18) saturate(.88) brightness(.94) sepia(.06)',grain:0,caption:'Street tone · đen sâu, màu trầm lạnh, da và ánh đèn ấm, nét rõ.'},
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
  sunny:{css:'saturate(1.08) contrast(1.08) sepia(.10) brightness(1.025)',grain:0,caption:'Ánh nắng ấm, da tự nhiên và màu film compact.'},
@@ -230,6 +232,24 @@ function captureNow(){
  if(!nativeZoom&&zoom>1){const baseW=sw,baseH=sh;sw=baseW/zoom;sh=baseH/zoom;sx+=(baseW-sw)/2;sy+=(baseH-sh)/2}
  const w=Math.round(sw),h=Math.round(sh);canvas.width=w;canvas.height=h;
  ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css;ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();ctx.filter='none';
+ if(filter==='street'){
+  const im=ctx.getImageData(0,0,w,h),d=im.data;
+  for(let i=0;i<d.length;i+=4){
+   let r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255;
+   r=(r-.5)*1.16+.5;g=(g-.5)*1.16+.5;b=(b-.5)*1.16+.5;
+   const y=.2126*r+.7152*g+.0722*b;
+   r=y+(r-y)*.91;g=y+(g-y)*.91;b=y+(b-y)*.91;
+   const shadow=Math.max(0,Math.min(1,(.52-y)*1.7));
+   const highlight=Math.max(0,Math.min(1,(y-.55)*1.5));
+   r+=highlight*.012-shadow*.012;
+   g+=highlight*.004;
+   b+=shadow*.022-highlight*.008;
+   d[i]=Math.max(0,Math.min(255,r*255));
+   d[i+1]=Math.max(0,Math.min(255,g*255));
+   d[i+2]=Math.max(0,Math.min(255,b*255));
+  }
+  ctx.putImageData(im,0,0);
+ }
  const amount=looks[filter].grain;if(amount){const im=ctx.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){let n=(Math.random()-.5)*amount;d[i]+=n;d[i+1]+=n;d[i+2]+=n}ctx.putImageData(im,0,0)}
  canvas.toBlob(async blob=>{
   if(!blob){say('Lỗi tạo ảnh, thử lại nhé.');return}
