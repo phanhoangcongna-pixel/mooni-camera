@@ -26,7 +26,7 @@ header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content
 .placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
 .frame-guide{position:absolute;z-index:2;left:27%;top:24%;width:46%;height:52%;border:2px solid #fff;border-radius:22px;pointer-events:none;box-shadow:0 0 0 999px #00000008}
 .frame-label{position:absolute;z-index:3;top:calc(24% - 26px);left:0;right:0;text-align:center;color:white;font-size:12px;font-weight:650;letter-spacing:.04em;text-shadow:0 1px 4px #0009;pointer-events:none}
-.exposure-ui{position:absolute;z-index:5;left:9px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:11px 7px;border-radius:22px;background:#171614d9;border:1px solid #ffffff45;color:#fff;font-size:12px;backdrop-filter:blur(10px);width:38px;height:190px}.exposure-ui input{writing-mode:vertical-lr;direction:rtl;flex:1;min-height:0;width:20px;height:145px;accent-color:#fff;touch-action:pan-y}.exposure-ui span:last-child{font-size:9px;font-variant-numeric:tabular-nums}.focus-ring{position:absolute;z-index:4;width:54px;height:54px;border:1.5px solid #fff;border-radius:50%;display:none;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #0005}.stage-meta{position:absolute;z-index:3;bottom:15px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;pointer-events:auto}
+.exposure-ui{position:absolute;z-index:5;right:8px;left:auto;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border-radius:18px;background:#171614d9;border:1px solid #ffffff45;color:#fff;font-size:10px;backdrop-filter:blur(10px);width:28px;height:132px}.exposure-ui input{writing-mode:vertical-lr;direction:rtl;flex:1;min-height:0;width:16px;height:94px;accent-color:#fff;touch-action:pan-y}.exposure-ui span:last-child{font-size:9px;font-variant-numeric:tabular-nums}.focus-ring{position:absolute;z-index:4;width:46px;height:46px;border:1.5px solid #fff;border-radius:50%;display:none;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #0005}.stage-meta{position:absolute;z-index:3;bottom:15px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;pointer-events:auto}
 .meta-chip{background:#161512b8;color:#fff;border:1px solid #ffffff1c;border-radius:30px;padding:9px 13px;font-size:11px;backdrop-filter:blur(12px)}
 .toolbar{position:absolute;z-index:4;top:12px;left:12px;right:12px;display:flex;justify-content:flex-end}.zoom-control{display:flex;align-items:center;gap:2px;padding:4px;background:#171614b8;border:1px solid #ffffff35;border-radius:24px;backdrop-filter:blur(12px)}.zoom-control button{width:34px;height:30px;border:0;border-radius:18px;background:transparent;color:#fff;font-size:17px}.zoom-control button:disabled{opacity:.35}.zoom-control #zoomReset{width:42px;font-size:11px;font-weight:650}
 .pill{border:1px solid #ffffff40;background:#17161480;color:white;border-radius:30px;padding:8px 12px;font-size:11px;backdrop-filter:blur(12px)}
@@ -203,15 +203,31 @@ function stageElTapSetup(){
  stage.addEventListener('click',async e=>{
   if(e.target.closest('.stage-meta')||e.target.closest('.exposure-ui')||e.target.closest('.zoom-control'))return;
   if(e.target.closest('button'))return;
-  const rect=stage.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;
-  const ring=$('focusRing');ring.style.left=x+'px';ring.style.top=y+'px';ring.style.display='block';
-  clearTimeout(focusTimer);focusTimer=setTimeout(()=>ring.style.display='none',1200);
+  const rect=$('liveFrame').getBoundingClientRect();
+  if(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom)return;
+  const x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const ring=$('focusRing');ring.style.left=(rect.left-stage.getBoundingClientRect().left+x)+'px';ring.style.top=(rect.top-stage.getBoundingClientRect().top+y)+'px';ring.style.display='block';
+  clearTimeout(focusTimer);focusTimer=setTimeout(()=>ring.style.display='none',1400);
   const track=stream?.getVideoTracks()[0],caps=track?.getCapabilities?.()||{};
   const advanced=[];
   if(caps.focusMode?.includes?.('single-shot'))advanced.push({focusMode:'single-shot'});
   if(caps.exposureMode?.includes?.('single-shot'))advanced.push({exposureMode:'single-shot'});
   if(advanced.length)try{await track.applyConstraints({advanced})}catch(e){}
-  if(exposureRange){const normalized=1-(y/rect.height);await applyExposure(exposureRange.min+normalized*(exposureRange.max-exposureRange.min));}
+  // Estimate exposure from the tapped preview area, then adjust the whole frame.
+  if(video.videoWidth&&video.videoHeight){
+   const nx=x/rect.width,ny=y/rect.height;
+   const cropW=Math.min(video.videoWidth,video.videoHeight*rect.width/rect.height);
+   const cropH=Math.min(video.videoHeight,video.videoWidth*rect.height/rect.width);
+   const sx=(video.videoWidth-cropW)/2+(facing==='user'?(1-nx):nx)*cropW;
+   const sy=(video.videoHeight-cropH)/2+ny*cropH;
+   const sample=document.createElement('canvas');sample.width=12;sample.height=12;
+   const sc=sample.getContext('2d',{willReadFrequently:true});
+   sc.drawImage(video,Math.max(0,sx-6),Math.max(0,sy-6),12,12,0,0,12,12);
+   const px=sc.getImageData(0,0,12,12).data;let lum=0;
+   for(let i=0;i<px.length;i+=4)lum+=(.2126*px[i]+.7152*px[i+1]+.0722*px[i+2])/255;
+   lum/=144;
+   await applyExposure(Math.max(-2,Math.min(2,2*Math.log2(.46/Math.max(.035,lum)))));
+  }
  });
 }
 function updateZoom(){
