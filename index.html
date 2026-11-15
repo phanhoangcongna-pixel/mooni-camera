@@ -234,7 +234,7 @@ function setRatio(value){
  updatePreviewFrame();
 }
 document.querySelectorAll('.ratio').forEach(b=>b.addEventListener('click',()=>setRatio(b.dataset.ratio)));
-$('landscapeShot').addEventListener('click',async()=>{if(!landscapeMode){landscapeMode=true;if(facing!=='user'){facing='user'}await startCamera()}else{landscapeMode=false;zoom=1;updateZoom()}updatePreviewFrame();say(landscapeMode?'Chế độ chụp ngang · camera trước':'Đã trở về khung dọc')});
+$('landscapeShot').addEventListener('click',async()=>{if(!landscapeMode){landscapeMode=true;if(facing!=='user'){facing='user'}await startCamera()}else{landscapeMode=false;zoom=1;updateZoom()}document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(!landscapeMode&&b.dataset.ratio===ratio)));updatePreviewFrame();say(landscapeMode?'Chế độ chụp ngang · camera trước':'Đã trở về khung dọc')});
 
 let pinchStart=0,pinchZoom=1;
 const stageEl=document.querySelector('.stage');
