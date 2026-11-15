@@ -154,7 +154,13 @@ async function setZoom(value,mm){
 }
 document.querySelectorAll('.lens-choice').forEach(b=>b.addEventListener('click',()=>{const mm=Number(b.dataset.mm);const factors={40:1,53:1.325,72:1.8,97:2.425};setZoom(factors[mm],mm)}));
 function setRatio(value){
- ratio=value;document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
+ ratio=value;
+ document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
+ const stage=document.querySelector('.stage');
+ stage.dataset.ratio=value;
+ // Keep the camera viewport and all controls fixed; only the captured crop changes.
+}
+document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
  const stage=document.querySelector('.stage');
  const map={'4:3':{ar:'3/4',width:'100%'},'16:9':{ar:'9/16',width:'100%'},'1:1':{ar:'1/1',width:'min(100%, 56svh)'},'full':{ar:'9/19.5',width:'min(100%, 29svh)'}};
  stage.style.aspectRatio=map[value].ar;stage.style.width=map[value].width;stage.style.maxHeight='none';
