@@ -106,7 +106,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[],exposureValue=0,exposureRange=null,focusTimer=null;
+let stream=null,flashEnabled=false,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[],exposureValue=0,exposureRange=null,focusTimer=null;
 const looks={
  street:{css:'contrast(1.18) saturate(.88) brightness(.94) sepia(.06)',grain:0,caption:'Street tone · đen sâu, màu trầm lạnh, da và ánh đèn ấm, nét rõ.'},
  forest:{css:'contrast(1.18) saturate(.92) brightness(1.035) hue-rotate(-7deg)',grain:0,caption:'Forest · xanh lá trầm, vùng sáng ngả cyan nhẹ, trắng sạch, tương phản sâu và chi tiết rõ.'},
@@ -132,15 +132,16 @@ async function setTorch(on){
  const track=stream?.getVideoTracks()[0];
  const caps=track?.getCapabilities?track.getCapabilities():{};
  torchSupported=!!caps.torch;
- if(!track||!torchSupported){torchOn=false;$('flashToggle').setAttribute('aria-pressed','false');say('iPhone/Safari hiện không hỗ trợ điều khiển đèn flash trong camera web.');return}
- try{
-  await track.applyConstraints({advanced:[{torch:on}]});
-  torchOn=on;$('flashToggle').setAttribute('aria-pressed',String(on));
-  $('flashToggle').style.background=on?'#e8c98b':'#fff9';
-  say(on?'Đèn flash đang bật':'Đèn flash đã tắt');
- }catch(e){torchOn=false;$('flashToggle').setAttribute('aria-pressed','false');say('Không bật được đèn flash trên camera này.')}
+ if(!track||!torchSupported){torchOn=false;return false}
+ try{await track.applyConstraints({advanced:[{torch:on}]});torchOn=on;return true}
+ catch(e){torchOn=false;return false}
 }
-$('flashToggle').addEventListener('click',()=>setTorch(!torchOn));
+$('flashToggle').addEventListener('click',()=>{
+ flashEnabled=!flashEnabled;
+ $('flashToggle').setAttribute('aria-pressed',String(flashEnabled));
+ $('flashToggle').style.background=flashEnabled?'#e8c98b':'transparent';
+ say(flashEnabled?'Flash bật · chỉ nháy khi chụp':'Flash tắt');
+});
 $('filterToggle').addEventListener('click',()=>{const f=$('filterToggle');const nav=document.querySelector('.filters');nav.style.display=nav.style.display==='none'?'flex':'none';f.setAttribute('aria-pressed',String(nav.style.display==='none'));});
 $('timerToggle').addEventListener('click',()=>{timerSeconds=timerSeconds===0?3:timerSeconds===3?10:0;$('timerToggle').textContent=timerSeconds?String(timerSeconds):'◷';$('timerToggle').setAttribute('aria-pressed',String(!!timerSeconds));say(timerSeconds?'Hẹn giờ '+timerSeconds+' giây':'Đã tắt hẹn giờ');});
 function applyLiveFilter(){const exposure=Math.pow(2,exposureValue/2);video.style.filter=(looks[filter]?.css||'none')+' brightness('+exposure.toFixed(3)+')'}
@@ -283,8 +284,10 @@ $('capture').onclick=()=>{
  if(timerSeconds){const wait=timerSeconds;timerSeconds=0;$('timerToggle').textContent='◷';$('timerToggle').setAttribute('aria-pressed','false');let left=wait;say('Sẽ chụp sau '+left+' giây');const tick=()=>{left--;if(left>0){say('Còn '+left+' giây…');setTimeout(tick,1000)}else captureNow()};setTimeout(tick,1000);return}
  captureNow();
 };
-function captureNow(){
+async function captureNow(){
  if(!stream||!video.videoWidth)return;
+ let hardwareFlash=false;
+ if(flashEnabled){hardwareFlash=await setTorch(true);if(hardwareFlash)await new Promise(resolve=>setTimeout(resolve,220));else say('Máy không hỗ trợ flash phần cứng trong Safari; ảnh sẽ dùng ánh sáng hiện có.');}
  const vw=video.videoWidth,vh=video.videoHeight;
  // Use the full camera frame, crop only to the chosen output ratio.
  const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
@@ -294,6 +297,7 @@ function captureNow(){
  if(!nativeZoom&&zoom>1){const baseW=sw,baseH=sh;sw=baseW/zoom;sh=baseH/zoom;sx+=(baseW-sw)/2;sy+=(baseH-sh)/2}
  const w=Math.round(sw),h=Math.round(sh);canvas.width=w;canvas.height=h;
  ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css+' brightness('+Math.pow(2,exposureValue/2).toFixed(3)+')';ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();ctx.filter='none';
+ if(hardwareFlash){await setTorch(false);}
  if(filter==='streetbeauty'){
   // Gentle skin-tone selective smoothing: blend a lightly blurred layer only
   // on likely skin pixels, while keeping edges and fine detail from the original.
