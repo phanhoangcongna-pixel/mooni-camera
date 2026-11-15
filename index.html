@@ -34,9 +34,11 @@ video.selfie-preview{transform:scaleX(-1)}
 .zoom-row{display:flex;align-items:center;gap:10px}
 .zoom-row span{font-size:10px!important;color:#aaa69e!important}
 .lens-choice{border:1px solid #393833;background:#171715;color:#a7a49d;border-radius:22px;padding:8px 16px;font-size:11px;flex:1}.lens-choice.active{background:#f2f0e9;color:#161512;border-color:#f2f0e9;font-weight:650}
-.ratios{display:flex;justify-content:center;gap:5px;padding:5px 0 3px}
-.ratio{border:1px solid transparent;background:transparent;color:#8f8d87;border-radius:20px;padding:5px 11px;font-size:10px;letter-spacing:.04em}
-.ratio[aria-pressed=true]{background:#292824;color:#fff;border-color:#494740;font-weight:600}
+.ratio-wrap{padding:7px 0 5px}
+.ratio-label{font-size:8px;color:#77746e;letter-spacing:.18em;text-align:center;margin-bottom:7px}
+.ratios{display:flex;justify-content:center;gap:3px;padding:3px;background:#191917;border:1px solid #35342f;border-radius:24px;width:min(100%,250px);margin:0 auto}
+.ratio{flex:1;border:0;background:transparent;color:#99968f;border-radius:20px;padding:8px 13px;font-size:11px;letter-spacing:.02em}
+.ratio[aria-pressed=true]{background:#f1efe8;color:#171613;font-weight:650;box-shadow:0 1px 4px #0005}
 .filters{display:flex;gap:9px;overflow-x:auto;padding:9px 1px 8px;scrollbar-width:none;scroll-snap-type:x proximity}
 .filters::-webkit-scrollbar{display:none}
 .filter{flex:0 0 57px;border:0;background:none;color:#85827b;font-size:8px;letter-spacing:.07em;padding:0;scroll-snap-align:start}
@@ -84,12 +86,11 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
  <div class="zoom-head"><span>FOCAL LENGTH</span><strong id="zoomValue">53mm</strong></div>
  <div class="zoom-row"><button class="lens-choice" data-mm="40">40</button><button class="lens-choice active" data-mm="53">53</button><button class="lens-choice" data-mm="72">72</button><button class="lens-choice" data-mm="97">97</button></div>
 </div>
-<div class="ratios" aria-label="Tỷ lệ ảnh">
+<div class="ratio-wrap"><div class="ratio-label">ASPECT RATIO</div><div class="ratios" aria-label="Tỷ lệ ảnh">
  <button class="ratio" data-ratio="4:3" aria-pressed="true">4:3</button>
  <button class="ratio" data-ratio="16:9" aria-pressed="false">16:9</button>
  <button class="ratio" data-ratio="1:1" aria-pressed="false">1:1</button>
- <button class="ratio" data-ratio="full" aria-pressed="false">FULL</button>
-</div>
+</div></div>
 <div class="caption" id="caption">Màu gốc, giữ nguyên chất ảnh camera.</div>
 <div class="controls"><button class="round" id="last" aria-label="Ảnh vừa chụp" title="Ảnh vừa chụp">▧</button><button class="round" id="filterToggle" aria-label="Hiện bộ lọc" title="Bộ lọc">▢</button><button class="round" id="timerToggle" aria-label="Hẹn giờ" title="Hẹn giờ">◷</button><button class="round" id="flashToggle" aria-label="Bật đèn flash" aria-pressed="false" title="Flash">ϟ</button><button class="round" id="flip2" aria-label="Đổi camera" title="Đổi camera">⟳</button></div><div class="controls" style="padding-top:0"><button class="shutter" id="capture" aria-label="Chụp ảnh"></button></div>
 <div class="status" id="status">MOONI · bản thử nghiệm miễn phí</div>
@@ -195,7 +196,7 @@ function captureNow(){
  if(!stream||!video.videoWidth)return;
  const vw=video.videoWidth,vh=video.videoHeight;
  // Use the full camera frame, crop only to the chosen output ratio.
- const ratios={'4:3':3/4,'16:9':9/16,'1:1':1,'full':9/19.5};
+ const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
  const target=ratios[ratio];let sx=0,sy=0,sw=vw,sh=vh;
  if(sw/sh>target){sw=sh*target;sx=(vw-sw)/2}else{sh=sw/target;sy=(vh-sh)/2}
  // When native lens zoom is unavailable, emulate zoom by cropping the sensor frame.
