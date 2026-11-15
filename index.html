@@ -33,7 +33,7 @@ video.selfie-preview{transform:scaleX(-1)}
 .zoom-head strong{color:#f5f2eb;font-size:11px;letter-spacing:0;font-weight:500;font-variant-numeric:tabular-nums}
 .zoom-row{display:flex;align-items:center;gap:10px}
 .zoom-row span{font-size:10px!important;color:#aaa69e!important}
-.zoom-row input{width:100%;height:2px;accent-color:#e9e5dc}
+.lens-choice{border:1px solid #393833;background:#171715;color:#a7a49d;border-radius:22px;padding:8px 16px;font-size:11px;flex:1}.lens-choice.active{background:#f2f0e9;color:#161512;border-color:#f2f0e9;font-weight:650}
 .ratios{display:flex;justify-content:center;gap:5px;padding:5px 0 3px}
 .ratio{border:1px solid transparent;background:transparent;color:#8f8d87;border-radius:20px;padding:5px 11px;font-size:10px;letter-spacing:.04em}
 .ratio[aria-pressed=true]{background:#292824;color:#fff;border-color:#494740;font-weight:600}
@@ -64,7 +64,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <header><div class="logo">MOONI</div><div class="tag">little moments, softly remembered.</div></header>
 <section class="stage">
 <video id="video" autoplay playsinline muted></video>
-<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="frame-guide"></div><div class="frame-label">53mm</div><div class="stage-meta"><span class="meta-chip" id="lensMeta">◉ &nbsp; 1×</span><span class="meta-chip" id="exposureMeta">☼ &nbsp; AUTO</span></div>
+<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="stage-meta"><span class="meta-chip" id="lensMeta">53mm</span><span class="meta-chip" id="exposureMeta">☼ &nbsp; AUTO</span></div>
 </section>
 <nav class="filters" aria-label="Bộ lọc màu">
 <button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
@@ -81,8 +81,8 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <button class="filter" data-f="vivid" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#177b80,#e5b77c)"></div>VIVID</button>
 </nav>
 <div class="zoom-panel">
- <div class="zoom-head"><span>ZOOM</span><strong id="zoomValue">1.0×</strong></div>
- <div class="zoom-row"><span style="font-size:11px;color:var(--muted)">1×</span><input id="zoom" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom camera"><span style="font-size:11px;color:var(--muted)">3×</span></div>
+ <div class="zoom-head"><span>FOCAL LENGTH</span><strong id="zoomValue">53mm</strong></div>
+ <div class="zoom-row"><button class="lens-choice" data-mm="40">40</button><button class="lens-choice active" data-mm="53">53</button><button class="lens-choice" data-mm="72">72</button><button class="lens-choice" data-mm="97">97</button></div>
 </div>
 <div class="ratios" aria-label="Tỷ lệ ảnh">
  <button class="ratio" data-ratio="4:3" aria-pressed="true">4:3</button>
@@ -98,7 +98,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,ratio='4:3',torchOn=false,torchSupported=false,timerSeconds=0;
+let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1.325,nativeZoom=false,ratio='4:3',torchOn=false,torchSupported=false,timerSeconds=0,focal=53;
 const looks={
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
@@ -138,20 +138,21 @@ async function startCamera(){
  video.srcObject=stream;video.classList.toggle('selfie-preview',facing==='user');await video.play();$('placeholder').style.display='none';
  const track=stream.getVideoTracks()[0],caps=track.getCapabilities?track.getCapabilities():{};
  nativeZoom=!!(caps.zoom&&typeof caps.zoom.max==='number'&&caps.zoom.max>1);torchSupported=!!caps.torch;torchOn=false;$('flashToggle').setAttribute('aria-pressed','false');$('flashToggle').style.background='#fff9';$('flashToggle').style.opacity=torchSupported?'1':'.55';$('flashToggle').title=torchSupported?'Bật/tắt đèn flash':'Thiết bị/trình duyệt không hỗ trợ đèn flash trong web camera';
- const z=$('zoom');z.max=nativeZoom?Math.min(5,caps.zoom.max):3;z.min=nativeZoom?Math.max(1,caps.zoom.min||1):1;z.value=1;zoom=1;updateZoom();
+ const z=$('zoom');zoom=1.325;focal=53;updateZoom();if(nativeZoom){const desired=Math.min(caps.zoom.max,Math.max(caps.zoom.min||1,zoom));zoom=desired;updateZoom();try{await track.applyConstraints({advanced:[{zoom}]})}catch(e){nativeZoom=false;updateZoom()}}
  say((facing==='user'?'Camera trước':'Camera sau')+' đang bật · '+video.videoWidth+'×'+video.videoHeight);
  }catch(e){$('placeholder').innerHTML='MOONI<br><small>Hãy cho phép camera trong Safari rồi tải lại trang nhé.</small>';say('Chưa mở được camera. Hãy kiểm tra quyền Camera của Safari.')}
 }
 function updateZoom(){
- $('zoomValue').textContent=zoom.toFixed(1)+'×';
- $('zoom').value=zoom;
- video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
+ $('zoomValue').textContent=focal+'mm';
+ document.querySelectorAll('.lens-choice').forEach(b=>b.classList.toggle('active',Number(b.dataset.mm)===focal));
+ video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom?'scale('+zoom+')':'');
+ $('lensMeta').textContent=focal+'mm';
 }
-async function setZoom(value){
- zoom=Number(value);updateZoom();
- if(nativeZoom&&stream){try{await stream.getVideoTracks()[0].applyConstraints({advanced:[{zoom}]})}catch(e){nativeZoom=false;updateZoom();say('Zoom số đang dùng · độ nét phụ thuộc camera')}}
+async function setZoom(value,mm){
+ zoom=Number(value);if(mm)focal=Number(mm);updateZoom();
+ if(nativeZoom&&stream){try{await stream.getVideoTracks()[0].applyConstraints({advanced:[{zoom}]})}catch(e){nativeZoom=false;updateZoom();say('Đang dùng zoom kỹ thuật số · độ nét có thể giảm')}}
 }
-$('zoom').addEventListener('input',e=>setZoom(e.target.value));
+document.querySelectorAll('.lens-choice').forEach(b=>b.addEventListener('click',()=>{const mm=Number(b.dataset.mm);const factors={40:1,53:1.325,72:1.8,97:2.425};setZoom(factors[mm],mm)}));
 function setRatio(value){
  ratio=value;document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
  const stage=document.querySelector('.stage');
