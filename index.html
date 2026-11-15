@@ -38,8 +38,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <header><div class="logo">MOONI</div><div class="tag">little moments, softly remembered.</div></header>
 <section class="stage">
 <video id="video" autoplay playsinline muted></video>
-<div class="placeholder" id="placeholder">Một khoảnh khắc nhỏ,<br>được lưu thật tự nhiên.<br><small>Chạm “Bật camera” để bắt đầu</small></div>
-<div class="toolbar"><button class="pill" id="flip">↻ Đổi cam</button><button class="pill" id="start">Bật camera</button></div>
+<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div>
 </section>
 <nav class="filters" aria-label="Bộ lọc màu">
 <button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
@@ -100,7 +99,7 @@ async function startCamera(){
  nativeZoom=!!(caps.zoom&&typeof caps.zoom.max==='number'&&caps.zoom.max>1);
  const z=$('zoom');z.max=nativeZoom?Math.min(5,caps.zoom.max):3;z.min=nativeZoom?Math.max(1,caps.zoom.min||1):1;z.value=1;zoom=1;updateZoom();
  say((facing==='user'?'Camera trước':'Camera sau')+' đang bật · '+video.videoWidth+'×'+video.videoHeight);
- }catch(e){say('Chưa mở được camera. Hãy cấp quyền Camera cho Safari.')}
+ }catch(e){$('placeholder').innerHTML='MOONI<br><small>Hãy cho phép camera trong Safari rồi tải lại trang nhé.</small>';say('Chưa mở được camera. Hãy kiểm tra quyền Camera của Safari.')}
 }
 function updateZoom(){
  $('zoomValue').textContent=zoom.toFixed(1)+'×';
@@ -120,7 +119,7 @@ function setRatio(value){
 }
 document.querySelectorAll('.ratio').forEach(b=>b.addEventListener('click',()=>setRatio(b.dataset.ratio)));
 function flip(){facing=facing==='environment'?'user':'environment';startCamera()}
-$('start').onclick=startCamera;$('flip').onclick=flip;$('flip2').onclick=flip;
+$('flip2').onclick=flip;
 $('capture').onclick=()=>{
  if(!stream||!video.videoWidth){say('Hãy bật camera trước nhé.');return}
  const vw=video.videoWidth,vh=video.videoHeight;
@@ -137,5 +136,8 @@ $('capture').onclick=()=>{
 };
 $('again').onclick=()=>$('result').style.display='none';
 $('last').onclick=()=>{if(lastUrl){$('result').style.display='block'}else say('Ảnh vừa chụp sẽ xuất hiện ở đây.')};
-setRatio('4:3');if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+setRatio('4:3');
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+ // Request camera as soon as the app opens. Safari still asks the user to grant permission.
+ startCamera();
 </script></body></html>
