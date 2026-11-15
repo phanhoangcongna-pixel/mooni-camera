@@ -26,7 +26,7 @@ header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content
 .placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
 .frame-guide{position:absolute;z-index:2;left:27%;top:24%;width:46%;height:52%;border:2px solid #fff;border-radius:22px;pointer-events:none;box-shadow:0 0 0 999px #00000008}
 .frame-label{position:absolute;z-index:3;top:calc(24% - 26px);left:0;right:0;text-align:center;color:white;font-size:12px;font-weight:650;letter-spacing:.04em;text-shadow:0 1px 4px #0009;pointer-events:none}
-.exposure-ui{position:absolute;z-index:5;right:8px;left:auto;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border-radius:18px;background:#171614d9;border:1px solid #ffffff45;color:#fff;font-size:10px;backdrop-filter:blur(10px);width:28px;height:132px}.exposure-ui{position:absolute}.exposure-ui #exposureSlider{position:absolute;left:50%;top:50%;width:44px;height:112px;transform:translate(-50%,-50%);border-radius:22px;background:transparent;touch-action:none;cursor:ns-resize;z-index:6;outline:none;pointer-events:auto}.exposure-track{position:absolute;left:50%;top:6px;bottom:6px;width:4px;transform:translateX(-50%);border-radius:9px;background:#777;pointer-events:none}.exposure-thumb{position:absolute;left:50%;bottom:calc(var(--level,50%) - 11px);width:23px;height:34px;transform:translate(-50%,50%);border-radius:12px;background:#fff;box-shadow:0 1px 5px #0009;pointer-events:none}.exposure-ui #exposureSlider:focus-visible{outline:1px solid #fff;outline-offset:8px}.exposure-ui span:last-child{font-size:9px;font-variant-numeric:tabular-nums}.focus-ring{position:absolute;z-index:4;width:46px;height:46px;border:1.5px solid #fff;border-radius:50%;display:none;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #0005}.stage-meta{position:absolute;z-index:3;bottom:15px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;pointer-events:auto}
+.exposure-ui{position:absolute;z-index:5;right:8px;left:auto;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border-radius:18px;background:#171614d9;border:1px solid #ffffff45;color:#fff;font-size:10px;backdrop-filter:blur(10px);width:28px;height:132px}.exposure-ui{position:absolute}.exposure-ui{width:42px;height:150px;padding:8px 0;touch-action:none}.exposure-ui #exposureSlider{position:absolute;left:50%;top:50%;width:42px;height:112px;transform:translate(-50%,-50%);border-radius:22px;background:transparent;touch-action:none;cursor:ns-resize;z-index:6;outline:none;pointer-events:auto}.exposure-track{position:absolute;left:50%;top:11px;bottom:11px;width:4px;transform:translateX(-50%);border-radius:9px;background:#777;pointer-events:none}.exposure-thumb{position:absolute;left:50%;top:calc(11px + (100% - 22px)*var(--inverse-level,.5));width:23px;height:34px;transform:translate(-50%,-50%);border-radius:12px;background:#fff;box-shadow:0 1px 5px #0009;pointer-events:none}.exposure-ui #exposureSlider:focus-visible{outline:1px solid #fff;outline-offset:8px}.exposure-ui span:last-child{font-size:9px;font-variant-numeric:tabular-nums}.focus-ring{position:absolute;z-index:4;width:46px;height:46px;border:1.5px solid #fff;border-radius:50%;display:none;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #0005}.stage-meta{position:absolute;z-index:3;bottom:15px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;pointer-events:auto}
 .meta-chip{background:#161512b8;color:#fff;border:1px solid #ffffff1c;border-radius:30px;padding:9px 13px;font-size:11px;backdrop-filter:blur(12px)}
 .toolbar{position:absolute;z-index:4;top:12px;left:12px;right:12px;display:flex;justify-content:flex-end}.zoom-control{display:flex;align-items:center;gap:2px;padding:4px;background:#171614b8;border:1px solid #ffffff35;border-radius:24px;backdrop-filter:blur(12px)}.zoom-control button{width:34px;height:30px;border:0;border-radius:18px;background:transparent;color:#fff;font-size:17px}.zoom-control button:disabled{opacity:.35}.zoom-control #zoomReset{width:42px;font-size:11px;font-weight:650}
 .pill{border:1px solid #ffffff40;background:#17161480;color:white;border-radius:30px;padding:8px 12px;font-size:11px;backdrop-filter:blur(12px)}
@@ -197,7 +197,7 @@ async function startCamera(){
 async function applyExposure(value){
  exposureValue=Math.max(-2,Math.min(2,Number(value)));
  const slider=$('exposureSlider');
- slider.style.setProperty('--level',((exposureValue+2)/4*100)+'%');
+ slider.style.setProperty('--inverse-level',((2-exposureValue)/4));
  slider.setAttribute('aria-valuenow',exposureValue.toFixed(1));
  $('exposureValue').textContent=(exposureValue>0?'+':'')+exposureValue.toFixed(1);
  applyLiveFilter();
@@ -208,21 +208,22 @@ async function applyExposure(value){
  }
 }
 const exposureSlider=$('exposureSlider');
-let exposurePointer=null;
-function setExposureFromPointer(e){
+const exposureUI=$('exposureUI');
+let exposurePointer=null,exposureTouching=false;
+function setExposureAtY(clientY){
  const rect=exposureSlider.getBoundingClientRect();
- const fraction=Math.max(0,Math.min(1,1-(e.clientY-rect.top)/rect.height));
+ const usableTop=rect.top+11,usableHeight=rect.height-22;
+ const fraction=Math.max(0,Math.min(1,1-(clientY-usableTop)/usableHeight));
  applyExposure(-2+fraction*4);
 }
-exposureSlider.addEventListener('pointerdown',e=>{exposurePointer=e.pointerId;try{exposureSlider.setPointerCapture(e.pointerId)}catch(err){}setExposureFromPointer(e);e.preventDefault()});
-exposureSlider.addEventListener('pointermove',e=>{if(exposurePointer===e.pointerId)setExposureFromPointer(e)});
-exposureSlider.addEventListener('pointerup',e=>{if(exposurePointer===e.pointerId)exposurePointer=null});
-exposureSlider.addEventListener('pointercancel',()=>{exposurePointer=null});
-let exposureTouching=false;
-exposureSlider.addEventListener('touchstart',e=>{if(!e.changedTouches.length)return;exposureTouching=true;const t=e.changedTouches[0];setExposureFromPointer({clientY:t.clientY});e.preventDefault()},{passive:false});
-exposureSlider.addEventListener('touchmove',e=>{if(!exposureTouching||!e.changedTouches.length)return;const t=e.changedTouches[0];setExposureFromPointer({clientY:t.clientY});e.preventDefault()},{passive:false});
-exposureSlider.addEventListener('touchend',()=>{exposureTouching=false});
-exposureSlider.addEventListener('touchcancel',()=>{exposureTouching=false});
+exposureUI.addEventListener('pointerdown',e=>{exposurePointer=e.pointerId;setExposureAtY(e.clientY);e.preventDefault()});
+window.addEventListener('pointermove',e=>{if(exposurePointer===e.pointerId)setExposureAtY(e.clientY)});
+window.addEventListener('pointerup',e=>{if(exposurePointer===e.pointerId)exposurePointer=null});
+window.addEventListener('pointercancel',()=>{exposurePointer=null});
+exposureUI.addEventListener('touchstart',e=>{if(!e.changedTouches.length)return;exposureTouching=true;setExposureAtY(e.changedTouches[0].clientY);e.preventDefault()},{passive:false});
+exposureUI.addEventListener('touchmove',e=>{if(!exposureTouching||!e.changedTouches.length)return;setExposureAtY(e.changedTouches[0].clientY);e.preventDefault()},{passive:false});
+exposureUI.addEventListener('touchend',()=>{exposureTouching=false});
+exposureUI.addEventListener('touchcancel',()=>{exposureTouching=false});
 exposureSlider.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowRight'){applyExposure(exposureValue+.1);e.preventDefault()}else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){applyExposure(exposureValue-.1);e.preventDefault()}else if(e.key==='Home'){applyExposure(-2);e.preventDefault()}else if(e.key==='End'){applyExposure(2);e.preventDefault()}});
 applyExposure(0);
 stageElTapSetup();
