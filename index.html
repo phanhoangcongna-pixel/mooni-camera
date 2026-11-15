@@ -34,7 +34,7 @@ header{height:40px;flex:0 0 40px;display:flex;align-items:center;justify-content
 .ratio-label{font-size:8px;color:#77746e;letter-spacing:.18em;text-align:center;margin-bottom:7px}
 .ratios{display:flex;justify-content:center;gap:3px;padding:3px;background:#191917;border:1px solid #35342f;border-radius:24px;width:min(100%,250px);margin:0 auto}
 .ratio{flex:1;border:0;background:transparent;color:#99968f;border-radius:20px;padding:8px 13px;font-size:11px;letter-spacing:.02em}
-.ratio[aria-pressed=true]{background:#f1efe8;color:#171613;font-weight:650;box-shadow:0 1px 4px #0005}
+.ratio[aria-pressed=true]{background:#f1efe8;color:#171613;font-weight:650;box-shadow:0 1px 4px #0005}.landscape-shot{display:block;margin:8px auto 0;padding:8px 15px;border:1px solid #555149;border-radius:22px;background:#191917;color:#e9e6df;font-size:9px;letter-spacing:.1em}.landscape-shot[aria-pressed=true]{background:#f1efe8;color:#171613}
 .filters{display:flex;gap:9px;overflow-x:auto;padding:9px 1px 8px;scrollbar-width:none;scroll-snap-type:x proximity}
 .filters::-webkit-scrollbar{display:none}
 .filter{flex:0 0 57px;border:0;background:none;color:#85827b;font-size:8px;letter-spacing:.07em;padding:0;scroll-snap-align:start}
@@ -87,7 +87,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
  <button class="ratio" data-ratio="4:3" aria-pressed="true">4:3</button>
  <button class="ratio" data-ratio="16:9" aria-pressed="false">16:9</button>
  <button class="ratio" data-ratio="1:1" aria-pressed="false">1:1</button>
-</div></div>
+</div><button class="landscape-shot" id="landscapeShot" aria-pressed="false">↔ &nbsp; CHỤP NGANG · CAMERA TRƯỚC</button></div>
 <div class="caption" id="caption">Màu gốc, giữ nguyên chất ảnh camera.</div>
 <div class="controls"><button class="round album-button" id="last" aria-label="Mở album ảnh" title="Album ảnh"><img id="albumLatest" alt="" hidden></button><button class="round" id="filterToggle" aria-label="Hiện bộ lọc" title="Bộ lọc">▢</button><button class="round" id="timerToggle" aria-label="Hẹn giờ" title="Hẹn giờ">◷</button><button class="round" id="flashToggle" aria-label="Bật đèn flash" aria-pressed="false" title="Flash">ϟ</button><button class="round" id="flip2" aria-label="Đổi camera" title="Đổi camera">⟳</button></div><div class="controls" style="padding-top:0"><button class="shutter" id="capture" aria-label="Chụp ảnh"></button></div>
 <div class="status" id="status">MOONI · bản thử nghiệm miễn phí</div>
@@ -100,7 +100,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
+let stream=null,facing='environment',filter='original',lastUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[];
 const looks={
  original:{css:'none',grain:0,caption:'Màu gốc, giữ nguyên chất ảnh camera.'},
  coast:{css:'saturate(1.18) contrast(1.10) brightness(1.025) hue-rotate(-5deg)',grain:0,caption:'Biển xanh teal, trời trong và cây xanh sâu — nét, không grain.'},
@@ -185,9 +185,22 @@ function updateZoom(){
  $('zoomOut').disabled=zoom<=1;
  $('zoomIn').disabled=zoom>=3;
 }
+function updatePreviewFrame(){
+ const stage=document.querySelector('.stage'),frame=$('liveFrame');
+ const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
+ const target=landscapeMode?16/9:(ratios[ratio]||3/4);
+ const boxW=stage.clientWidth,boxH=stage.clientHeight;
+ let w,h;
+ if(boxW/boxH>target){h=boxH;w=h*target}else{w=boxW;h=w/target}
+ frame.style.width=Math.round(w)+'px';frame.style.height=Math.round(h)+'px';
+ $('landscapeShot').setAttribute('aria-pressed',String(landscapeMode));
+}
 function setRatio(value){
- ratio=value;
+ ratio=value;landscapeMode=false;
  document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
+ updatePreviewFrame();
+}
+document.querySelectorAll('.ratio').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ratio===value)));
  const stage=document.querySelector('.stage'),frame=$('liveFrame');
  stage.dataset.ratio=value;
  const ratios={'4:3':3/4,'16:9':16/9,'1:1':1};
@@ -198,6 +211,7 @@ function setRatio(value){
  frame.style.width=Math.round(w)+'px';frame.style.height=Math.round(h)+'px';
 }
 document.querySelectorAll('.ratio').forEach(b=>b.addEventListener('click',()=>setRatio(b.dataset.ratio)));
+$('landscapeShot').addEventListener('click',async()=>{if(!landscapeMode){if(facing!=='user'){facing='user';await startCamera()}landscapeMode=true}else{landscapeMode=false}updatePreviewFrame();say(landscapeMode?'Chế độ chụp ngang · camera trước':'Đã trở về khung dọc')});
 
 let pinchStart=0,pinchZoom=1;
 const stageEl=document.querySelector('.stage');
@@ -219,8 +233,8 @@ function captureNow(){
  if(!stream||!video.videoWidth)return;
  const vw=video.videoWidth,vh=video.videoHeight;
  // Use the full camera frame, crop only to the chosen output ratio.
- const ratios={'4:3':3/4,'16:9':16/9,'1:1':1};
- const target=ratios[ratio];let sx=0,sy=0,sw=vw,sh=vh;
+ const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
+ const target=landscapeMode?16/9:(ratios[ratio]||3/4);let sx=0,sy=0,sw=vw,sh=vh;
  if(sw/sh>target){sw=sh*target;sx=(vw-sw)/2}else{sh=sw/target;sy=(vh-sh)/2}
  // Match the live digital zoom by cropping the captured frame.
  if(!nativeZoom&&zoom>1){const baseW=sw,baseH=sh;sw=baseW/zoom;sh=baseH/zoom;sx+=(baseW-sw)/2;sy+=(baseH-sh)/2}
@@ -249,7 +263,7 @@ function openGalleryDB(){return new Promise((resolve,reject)=>{const req=indexed
 async function saveGalleryItem(item){const db=await openGalleryDB();await new Promise((resolve,reject)=>{const tx=db.transaction('photos','readwrite');tx.objectStore('photos').put(item);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
-window.addEventListener('resize',()=>setRatio(ratio));
+window.addEventListener('resize',()=>updatePreviewFrame());
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
  startCamera();
