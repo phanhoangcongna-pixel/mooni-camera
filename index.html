@@ -26,7 +26,7 @@ header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content
 .placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#fff;font:16px/1.7 Georgia,serif;padding:25px}
 .frame-guide{position:absolute;z-index:2;left:27%;top:24%;width:46%;height:52%;border:2px solid #fff;border-radius:22px;pointer-events:none;box-shadow:0 0 0 999px #00000008}
 .frame-label{position:absolute;z-index:3;top:calc(24% - 26px);left:0;right:0;text-align:center;color:white;font-size:12px;font-weight:650;letter-spacing:.04em;text-shadow:0 1px 4px #0009;pointer-events:none}
-.exposure-ui{position:absolute;z-index:5;right:8px;left:auto;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border-radius:18px;background:#171614d9;border:1px solid #ffffff45;color:#fff;font-size:10px;backdrop-filter:blur(10px);width:28px;height:132px}.exposure-ui{position:absolute}.exposure-ui{width:42px;height:150px;padding:8px 0;touch-action:none}.exposure-ui #exposureSlider{position:absolute;left:50%;top:50%;width:42px;height:112px;transform:translate(-50%,-50%);border-radius:22px;background:transparent;touch-action:none;cursor:ns-resize;z-index:6;outline:none;pointer-events:auto}.exposure-track{position:absolute;left:50%;top:11px;bottom:11px;width:4px;transform:translateX(-50%);border-radius:9px;background:#777;pointer-events:none}.exposure-thumb{position:absolute;left:50%;top:calc(11px + (100% - 22px)*var(--inverse-level,.5));width:23px;height:34px;transform:translate(-50%,-50%);border-radius:12px;background:#fff;box-shadow:0 1px 5px #0009;pointer-events:none}.exposure-ui #exposureSlider:focus-visible{outline:1px solid #fff;outline-offset:8px}.exposure-ui span:last-child{font-size:9px;font-variant-numeric:tabular-nums}.focus-ring{position:absolute;z-index:4;width:46px;height:46px;border:1.5px solid #fff;border-radius:50%;display:none;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #0005}.stage-meta{position:absolute;z-index:3;bottom:15px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;pointer-events:auto}
+.exposure-ui #exposureSlider{position:absolute;left:50%;top:50%;width:42px;height:112px;transform:translate(-50%,-50%);border-radius:22px;background:transparent;touch-action:none;cursor:ns-resize;z-index:6;outline:none;pointer-events:auto}.exposure-ui #exposureSlider:focus-visible{outline:1px solid #fff;outline-offset:8px}.exposure-ui span:last-child{font-size:9px;font-variant-numeric:tabular-nums}.focus-ring{position:absolute;z-index:4;width:46px;height:46px;border:1.5px solid #fff;border-radius:50%;display:none;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #0005}.stage-meta{position:absolute;z-index:3;bottom:15px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:8px;pointer-events:auto}
 .meta-chip{background:#161512b8;color:#fff;border:1px solid #ffffff1c;border-radius:30px;padding:9px 13px;font-size:11px;backdrop-filter:blur(12px)}
 .toolbar{position:absolute;z-index:4;top:12px;left:12px;right:12px;display:flex;justify-content:flex-end}.zoom-control{display:flex;align-items:center;gap:2px;padding:4px;background:#171614b8;border:1px solid #ffffff35;border-radius:24px;backdrop-filter:blur(12px)}.zoom-control button{width:34px;height:30px;border:0;border-radius:18px;background:transparent;color:#fff;font-size:17px}.zoom-control button:disabled{opacity:.35}.zoom-control #zoomReset{width:42px;font-size:11px;font-weight:650}
 .pill{border:1px solid #ffffff40;background:#17161480;color:white;border-radius:30px;padding:8px 12px;font-size:11px;backdrop-filter:blur(12px)}
@@ -67,7 +67,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <header><div class="logo">MOONI</div><div class="tag">little moments, softly remembered.</div></header>
 <section class="stage">
 <div class="live-frame" id="liveFrame"><video id="video" autoplay playsinline muted></video></div>
-<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="exposure-ui" id="exposureUI"><span>☼</span><div id="exposureSlider" role="slider" tabindex="0" aria-label="Điều chỉnh độ sáng" aria-valuemin="-2" aria-valuemax="2" aria-valuenow="0"><div class="exposure-track"></div><div class="exposure-thumb" id="exposureThumb"></div></div><span id="exposureValue">0</span></div><div class="focus-ring" id="focusRing"></div><div class="stage-meta"><div class="zoom-control"><button id="zoomOut" aria-label="Thu nhỏ">−</button><button id="zoomReset" aria-label="Mức zoom hiện tại">1.0×</button><button id="zoomIn" aria-label="Phóng to">+</button></div></div>
+<div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="focus-ring" id="focusRing"></div><div class="stage-meta"><div class="zoom-control"><button id="zoomOut" aria-label="Thu nhỏ">−</button><button id="zoomReset" aria-label="Mức zoom hiện tại">1.0×</button><button id="zoomIn" aria-label="Phóng to">+</button></div></div>
 </section>
 <nav class="filters" aria-label="Bộ lọc màu">
 <button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
@@ -106,7 +106,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <canvas id="canvas" hidden></canvas>
 <script>
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let stream=null,flashEnabled=false,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[],exposureValue=0,exposureRange=null,focusTimer=null;
+let stream=null,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[],exposureValue=0,exposureRange=null,focusTimer=null;
 const looks={
  street:{css:'contrast(1.18) saturate(.88) brightness(.94) sepia(.06)',grain:0,caption:'Street tone · đen sâu, màu trầm lạnh, da và ánh đèn ấm, nét rõ.'},
  forest:{css:'contrast(1.18) saturate(.92) brightness(1.035) hue-rotate(-7deg)',grain:0,caption:'Forest · xanh lá trầm, vùng sáng ngả cyan nhẹ, trắng sạch, tương phản sâu và chi tiết rõ.'},
@@ -136,11 +136,13 @@ async function setTorch(on){
  try{await track.applyConstraints({advanced:[{torch:on}]});torchOn=on;return true}
  catch(e){torchOn=false;return false}
 }
-$('flashToggle').addEventListener('click',()=>{
- flashEnabled=!flashEnabled;
- $('flashToggle').setAttribute('aria-pressed',String(flashEnabled));
- $('flashToggle').style.background=flashEnabled?'#e8c98b':'transparent';
- say(flashEnabled?'Flash bật · chỉ nháy khi chụp':'Flash tắt');
+$('flashToggle').addEventListener('click',async()=>{
+ const next=!torchOn;
+ const ok=await setTorch(next);
+ $('flashToggle').setAttribute('aria-pressed',String(ok&&next));
+ $('flashToggle').style.background=ok&&next?'#e8c98b':'transparent';
+ if(ok)say(next?'Đèn sáng liên tục':'Đèn đã tắt');
+ else say('Thiết bị hoặc Safari không hỗ trợ bật đèn trong MOONI');
 });
 $('filterToggle').addEventListener('click',()=>{const f=$('filterToggle');const nav=document.querySelector('.filters');nav.style.display=nav.style.display==='none'?'flex':'none';f.setAttribute('aria-pressed',String(nav.style.display==='none'));});
 $('timerToggle').addEventListener('click',()=>{timerSeconds=timerSeconds===0?3:timerSeconds===3?10:0;$('timerToggle').textContent=timerSeconds?String(timerSeconds):'◷';$('timerToggle').setAttribute('aria-pressed',String(!!timerSeconds));say(timerSeconds?'Hẹn giờ '+timerSeconds+' giây':'Đã tắt hẹn giờ');});
@@ -196,10 +198,6 @@ async function startCamera(){
 }
 async function applyExposure(value){
  exposureValue=Math.max(-2,Math.min(2,Number(value)));
- const slider=$('exposureSlider');
- slider.style.setProperty('--inverse-level',((2-exposureValue)/4));
- slider.setAttribute('aria-valuenow',exposureValue.toFixed(1));
- $('exposureValue').textContent=(exposureValue>0?'+':'')+exposureValue.toFixed(1);
  applyLiveFilter();
  const track=stream?.getVideoTracks()[0];
  if(track&&exposureRange){
@@ -207,25 +205,6 @@ async function applyExposure(value){
   try{await track.applyConstraints({advanced:[{exposureCompensation:nativeValue}]})}catch(e){}
  }
 }
-const exposureSlider=$('exposureSlider');
-const exposureUI=$('exposureUI');
-let exposurePointer=null,exposureTouching=false;
-function setExposureAtY(clientY){
- const rect=exposureSlider.getBoundingClientRect();
- const usableTop=rect.top+11,usableHeight=rect.height-22;
- const fraction=Math.max(0,Math.min(1,1-(clientY-usableTop)/usableHeight));
- applyExposure(-2+fraction*4);
-}
-exposureUI.addEventListener('pointerdown',e=>{exposurePointer=e.pointerId;setExposureAtY(e.clientY);e.preventDefault()});
-window.addEventListener('pointermove',e=>{if(exposurePointer===e.pointerId)setExposureAtY(e.clientY)});
-window.addEventListener('pointerup',e=>{if(exposurePointer===e.pointerId)exposurePointer=null});
-window.addEventListener('pointercancel',()=>{exposurePointer=null});
-exposureUI.addEventListener('touchstart',e=>{if(!e.changedTouches.length)return;exposureTouching=true;setExposureAtY(e.changedTouches[0].clientY);e.preventDefault()},{passive:false});
-exposureUI.addEventListener('touchmove',e=>{if(!exposureTouching||!e.changedTouches.length)return;setExposureAtY(e.changedTouches[0].clientY);e.preventDefault()},{passive:false});
-exposureUI.addEventListener('touchend',()=>{exposureTouching=false});
-exposureUI.addEventListener('touchcancel',()=>{exposureTouching=false});
-exposureSlider.addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowRight'){applyExposure(exposureValue+.1);e.preventDefault()}else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){applyExposure(exposureValue-.1);e.preventDefault()}else if(e.key==='Home'){applyExposure(-2);e.preventDefault()}else if(e.key==='End'){applyExposure(2);e.preventDefault()}});
-applyExposure(0);
 stageElTapSetup();
 function stageElTapSetup(){
  const stage=document.querySelector('.stage');
@@ -304,8 +283,7 @@ $('capture').onclick=()=>{
 };
 async function captureNow(){
  if(!stream||!video.videoWidth)return;
- let hardwareFlash=false;
- if(flashEnabled){hardwareFlash=await setTorch(true);if(hardwareFlash){say('Đèn trợ sáng đang ổn định…');await new Promise(resolve=>setTimeout(resolve,650));}else say('Safari không hỗ trợ đèn flash chớp như Camera iPhone; ảnh dùng phơi sáng tự động.');}
+
  const vw=video.videoWidth,vh=video.videoHeight;
  // Use the full camera frame, crop only to the chosen output ratio.
  const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
@@ -315,7 +293,6 @@ async function captureNow(){
  if(!nativeZoom&&zoom>1){const baseW=sw,baseH=sh;sw=baseW/zoom;sh=baseH/zoom;sx+=(baseW-sw)/2;sy+=(baseH-sh)/2}
  const w=Math.round(sw),h=Math.round(sh);canvas.width=w;canvas.height=h;
  ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css;ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();ctx.filter='none';
- if(hardwareFlash){await setTorch(false);}
  if(filter==='streetbeauty'){
   // Gentle skin-tone selective smoothing: blend a lightly blurred layer only
   // on likely skin pixels, while keeping edges and fine detail from the original.
@@ -402,20 +379,6 @@ async function captureNow(){
   ac.filter='brightness('+Math.pow(2,exposureValue/2).toFixed(3)+')';
   ac.drawImage(canvas,0,0);ac.filter='none';
   ctx.clearRect(0,0,w,h);ctx.drawImage(adjusted,0,0);
- }
- // Softer highlight roll-off for flash-assisted shots, closer to a natural phone-camera result.
- if(flashEnabled){
-  const im=ctx.getImageData(0,0,w,h),d=im.data;
-  for(let i=0;i<d.length;i+=4){
-   const y=(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/255;
-   if(y>.58){
-    const t=(y-.58)/.42;
-    const mapped=.58+.42*(1-Math.exp(-1.15*t))/(1-Math.exp(-1.15));
-    const scale=mapped/Math.max(.001,y);
-    d[i]*=scale;d[i+1]*=scale;d[i+2]*=scale;
-   }
-  }
-  ctx.putImageData(im,0,0);
  }
  const amount=looks[filter].grain;if(amount){const im=ctx.getImageData(0,0,w,h),d=im.data;for(let i=0;i<d.length;i+=4){let n=(Math.random()-.5)*amount;d[i]+=n;d[i+1]+=n;d[i+2]+=n}ctx.putImageData(im,0,0)}
  canvas.toBlob(async blob=>{
