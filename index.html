@@ -321,7 +321,7 @@ $('capture').onclick=()=>{
  captureNow();
 };
 function applyLookPixels(css,w,h){
- const ops=[...String(css||'none').matchAll(/([a-z-]+)\\(([^)]+)\\)/g)].map(m=>[m[1],parseFloat(m[2])]);
+ const ops=[...String(css||'none').matchAll(/([a-z-]+)\(([^)]+)\)/g)].map(m=>[m[1],parseFloat(m[2])]);
  if(!ops.length)return;
  const image=ctx.getImageData(0,0,w,h),d=image.data;
  for(let i=0;i<d.length;i+=4){
