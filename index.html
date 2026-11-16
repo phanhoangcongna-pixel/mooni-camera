@@ -216,6 +216,7 @@ async function startCamera(){
    $('placeholder').style.display='none';
    const settings=stream?.getVideoTracks()[0]?.getSettings?.()||{};
    const actualW=video.videoWidth||settings.width||0,actualH=video.videoHeight||settings.height||0;
+   updatePreviewFrame();
    say((facing==='user'?'Camera trước':'Camera sau')+' · '+actualW+'×'+actualH+' · '+(actualW>=3840||actualH>=3840?'4K':'độ phân giải cao nhất thiết bị cấp')+' · zoom 1×');
   };
   const track=stream.getVideoTracks()[0],caps=track.getCapabilities?track.getCapabilities():{};
@@ -305,6 +306,19 @@ function updatePreviewFrame(){
  let w,h;
  if(boxW/boxH>target){h=boxH;w=h*target}else{w=boxW;h=w/target}
  frame.style.width=Math.round(w)+'px';frame.style.height=Math.round(h)+'px';
+ // iPhone Safari can return a landscape sensor frame while the phone is held upright.
+ // Rotate that source into portrait before object-fit so the preview is not center-cropped.
+ const rotatePortrait=!landscapeMode&&video.videoWidth>video.videoHeight;
+ if(rotatePortrait){
+  video.style.position='absolute';video.style.left='50%';video.style.top='50%';
+  video.style.width=frame.clientHeight+'px';video.style.height=frame.clientWidth+'px';
+  video.style.objectFit='cover';
+  video.style.transform='translate(-50%,-50%) rotate(90deg)'+(facing==='user'?' scaleX(-1)':'');
+ }else{
+  video.style.position='';video.style.left='';video.style.top='';
+  video.style.width='100%';video.style.height='100%';
+  video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
+ }
  $('landscapeShot').setAttribute('aria-pressed',String(landscapeMode));
 }
 function setRatio(value){
@@ -367,14 +381,19 @@ async function captureNow(){
  if(!stream||!video.videoWidth)return;
 
  const vw=video.videoWidth,vh=video.videoHeight;
- // Use the full camera frame, crop only to the chosen output ratio.
+ // Match the preview orientation: rotate landscape sensor output for portrait shooting.
+ let source=video,sourceW=vw,sourceH=vh;
+ if(!landscapeMode&&vw>vh){
+  const rotated=document.createElement('canvas');rotated.width=vh;rotated.height=vw;
+  const rctx=rotated.getContext('2d');rctx.translate(rotated.width,0);rctx.rotate(Math.PI/2);rctx.drawImage(video,0,0);
+  source=rotated;sourceW=rotated.width;sourceH=rotated.height;
+ }
  const ratios={'4:3':3/4,'16:9':9/16,'1:1':1};
- const target=landscapeMode?16/9:(ratios[ratio]||3/4);let sx=0,sy=0,sw=vw,sh=vh;
- if(sw/sh>target){sw=sh*target;sx=(vw-sw)/2}else{sh=sw/target;sy=(vh-sh)/2}
- // Match the live digital zoom by cropping the captured frame.
+ const target=landscapeMode?16/9:(ratios[ratio]||3/4);let sx=0,sy=0,sw=sourceW,sh=sourceH;
+ if(sw/sh>target){sw=sh*target;sx=(sourceW-sw)/2}else{sh=sw/target;sy=(sourceH-sh)/2}
  if(!nativeZoom&&zoom>1){const baseW=sw,baseH=sh;sw=baseW/zoom;sh=baseH/zoom;sx+=(baseW-sw)/2;sy+=(baseH-sh)/2}
  const w=Math.round(sw),h=Math.round(sh);canvas.width=w;canvas.height=h;
- ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();applyLookPixels(looks[filter]?.css||'none',w,h);
+ ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.drawImage(source,sx,sy,sw,sh,0,0,w,h);ctx.restore();applyLookPixels(looks[filter]?.css||'none',w,h);
  if(filter==='streetbeauty'){
   // Gentle skin-tone selective smoothing: blend a lightly blurred layer only
   // on likely skin pixels, while keeping edges and fine detail from the original.
@@ -527,7 +546,7 @@ $('deletePhoto').onclick=async()=>{
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
 window.addEventListener('resize',()=>updatePreviewFrame());
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v81',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v82',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
  startCamera();
 </script></body></html>
