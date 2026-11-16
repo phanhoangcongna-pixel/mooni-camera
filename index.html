@@ -320,6 +320,38 @@ $('capture').onclick=()=>{
  if(timerSeconds){const wait=timerSeconds;timerSeconds=0;$('timerToggle').textContent='◷';$('timerToggle').setAttribute('aria-pressed','false');let left=wait;say('Sẽ chụp sau '+left+' giây');const tick=()=>{left--;if(left>0){say('Còn '+left+' giây…');setTimeout(tick,1000)}else captureNow()};setTimeout(tick,1000);return}
  captureNow();
 };
+function applyLookPixels(css,w,h){
+ const ops=[...String(css||'none').matchAll(/([a-z-]+)\\(([^)]+)\\)/g)].map(m=>[m[1],parseFloat(m[2])]);
+ if(!ops.length)return;
+ const image=ctx.getImageData(0,0,w,h),d=image.data;
+ for(let i=0;i<d.length;i+=4){
+  let r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255;
+  for(const [name,value] of ops){
+   if(name==='brightness'){r*=value;g*=value;b*=value}
+   else if(name==='contrast'){r=(r-.5)*value+.5;g=(g-.5)*value+.5;b=(b-.5)*value+.5}
+   else if(name==='saturate'){
+    const y=.2126*r+.7152*g+.0722*b;
+    r=y+(r-y)*value;g=y+(g-y)*value;b=y+(b-y)*value;
+   }else if(name==='grayscale'){
+    const y=.2126*r+.7152*g+.0722*b;
+    r+=(y-r)*value;g+=(y-g)*value;b+=(y-b)*value;
+   }else if(name==='sepia'){
+    const nr=.393*r+.769*g+.189*b,ng=.349*r+.686*g+.168*b,nb=.272*r+.534*g+.131*b;
+    r+=(nr-r)*value;g+=(ng-g)*value;b+=(nb-b)*value;
+   }else if(name==='hue-rotate'){
+    const a=value*Math.PI/180,c=Math.cos(a),s=Math.sin(a);
+    const nr=(.213+c*.787-s*.213)*r+(.715-c*.715-s*.715)*g+(.072-c*.072+s*.928)*b;
+    const ng=(.213-c*.213+s*.143)*r+(.715+c*.285+s*.140)*g+(.072-c*.072-s*.283)*b;
+    const nb=(.213-c*.213-s*.787)*r+(.715-c*.715+s*.715)*g+(.072+c*.928+s*.072)*b;
+    r=nr;g=ng;b=nb;
+   }
+  }
+  d[i]=Math.max(0,Math.min(255,Math.round(r*255)));
+  d[i+1]=Math.max(0,Math.min(255,Math.round(g*255)));
+  d[i+2]=Math.max(0,Math.min(255,Math.round(b*255)));
+ }
+ ctx.putImageData(image,0,0);
+}
 async function captureNow(){
  if(!stream||!video.videoWidth)return;
 
@@ -331,7 +363,7 @@ async function captureNow(){
  // Match the live digital zoom by cropping the captured frame.
  if(!nativeZoom&&zoom>1){const baseW=sw,baseH=sh;sw=baseW/zoom;sh=baseH/zoom;sx+=(baseW-sw)/2;sy+=(baseH-sh)/2}
  const w=Math.round(sw),h=Math.round(sh);canvas.width=w;canvas.height=h;
- ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.filter=looks[filter].css;ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();ctx.filter='none';
+ ctx.save();if(facing==='user'){ctx.translate(w,0);ctx.scale(-1,1)}ctx.drawImage(video,sx,sy,sw,sh,0,0,w,h);ctx.restore();applyLookPixels(looks[filter]?.css||'none',w,h);
  if(filter==='streetbeauty'){
   // Gentle skin-tone selective smoothing: blend a lightly blurred layer only
   // on likely skin pixels, while keeping edges and fine detail from the original.
