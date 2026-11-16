@@ -37,6 +37,11 @@ header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content
 .ratios{display:flex;justify-content:center;gap:3px;padding:3px;background:#191917;border:1px solid #35342f;border-radius:24px;width:min(100%,250px);margin:0 auto}
 .ratio{flex:1;border:0;background:transparent;color:#99968f;border-radius:20px;padding:6px 11px;font-size:11px;letter-spacing:.02em}
 .ratio[aria-pressed=true]{background:#f1efe8;color:#171613;font-weight:650;box-shadow:0 1px 4px #0005}.landscape-shot{display:block;margin:5px auto 0;padding:6px 12px;border:1px solid #555149;border-radius:22px;background:#191917;color:#e9e6df;font-size:9px;letter-spacing:.1em}.landscape-shot[aria-pressed=true]{background:#f1efe8;color:#171613}
+.filter-categories{display:flex;flex:0 0 auto;gap:19px;align-items:center;overflow-x:auto;white-space:nowrap;padding:8px 3px 5px;scrollbar-width:none}
+.filter-categories::-webkit-scrollbar{display:none}
+.filter-category{position:relative;flex:0 0 auto;border:0;background:none;color:#85827b;padding:5px 1px 9px;font-size:12px}
+.filter-category[aria-pressed=true]{color:#f5f2ec;font-weight:650}
+.filter-category[aria-pressed=true]:after{content:"";position:absolute;left:25%;right:25%;bottom:1px;height:2px;border-radius:2px;background:#e9e5dc}
 .filters{display:flex;flex:0 0 auto;gap:8px;overflow-x:auto;padding:5px 1px 5px;scrollbar-width:none;scroll-snap-type:x proximity}
 .filters::-webkit-scrollbar{display:none}
 .filter{flex:0 0 57px;border:0;background:none;color:#85827b;font-size:8px;letter-spacing:.07em;padding:0;scroll-snap-align:start}
@@ -71,6 +76,13 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <div class="live-frame" id="liveFrame"><video id="video" autoplay playsinline muted></video></div>
 <div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="focus-ring" id="focusRing"></div><div class="stage-meta"><div class="zoom-control"><button id="zoomOut" aria-label="Thu nhỏ">−</button><button id="zoomReset" aria-label="Mức zoom hiện tại">1.0×</button><button id="zoomIn" aria-label="Phóng to">+</button></div></div>
 </section>
+<nav class="filter-categories" aria-label="Danh mục màu">
+<button class="filter-category" data-category="favorites" aria-pressed="false">Yêu thích</button>
+<button class="filter-category" data-category="featured" aria-pressed="true">Nổi bật</button>
+<button class="filter-category" data-category="new" aria-pressed="false">Mới</button>
+<button class="filter-category" data-category="basic" aria-pressed="false">Cơ bản</button>
+<button class="filter-category" data-category="flash" aria-pressed="false">Đèn flash</button>
+</nav>
 <nav class="filters" aria-label="Bộ lọc màu">
 <button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
 <button class="filter" data-f="street" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#172a2a,#8e7964)"></div>STREET</button>
@@ -180,6 +192,23 @@ $('filterToggle').addEventListener('click',()=>{const f=$('filterToggle');const 
 $('timerToggle').addEventListener('click',()=>{timerSeconds=timerSeconds===0?3:timerSeconds===3?10:0;$('timerToggle').textContent=timerSeconds?String(timerSeconds):'◷';$('timerToggle').setAttribute('aria-pressed',String(!!timerSeconds));say(timerSeconds?'Hẹn giờ '+timerSeconds+' giây':'Đã tắt hẹn giờ');});
 function applyLiveFilter(){const exposure=Math.pow(2,exposureValue/2);video.style.filter=(looks[filter]?.css||'none')+' brightness('+exposure.toFixed(3)+')'}
 function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===name)));applyLiveFilter();$('caption').textContent=looks[name].caption}
+
+const filterGroups={
+ favorites:['forest','cafe','classicchrome','japandream','sepiasoft','sepiafilm'],
+ featured:['street','forest','cafe','japandream','lavender','sepiasoft','sepiafilm','leicachrome','leicanatural'],
+ new:['classicchrome','eterna','nostalgic','astia','velvia','acros','japandream','lavender','sepiasoft','sepiafilm','leicanatural','leicachrome','leicavivid','leicawarm','leicamono'],
+ basic:['original','clear','cool','sunny','green','peach','mono','vivid','retro','softfilm'],
+ flash:['flash','streetbeauty','street']
+};
+function showFilterCategory(category){
+ document.querySelectorAll('.filter-category').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.category===category)));
+ const visible=filterGroups[category]||filterGroups.featured;
+ document.querySelectorAll('.filter').forEach(b=>{b.hidden=!visible.includes(b.dataset.f)});
+ const active=document.querySelector('.filter[aria-pressed="true"]:not([hidden])');
+ if(!active&&visible.length){const first=document.querySelector('.filter[data-f="'+visible[0]+'"]');if(first)first.scrollIntoView({block:'nearest',inline:'start'})}
+}
+document.querySelectorAll('.filter-category').forEach(b=>b.addEventListener('click',()=>showFilterCategory(b.dataset.category)));
+showFilterCategory('featured');
 document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.f)));
 async function startCamera(){
  if(!navigator.mediaDevices?.getUserMedia){say('Camera cần trang HTTPS. Hãy mở bằng Safari trên iPhone.');return}
