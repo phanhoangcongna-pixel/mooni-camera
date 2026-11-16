@@ -306,19 +306,13 @@ function updatePreviewFrame(){
  let w,h;
  if(boxW/boxH>target){h=boxH;w=h*target}else{w=boxW;h=w/target}
  frame.style.width=Math.round(w)+'px';frame.style.height=Math.round(h)+'px';
- // iPhone Safari can return a landscape sensor frame while the phone is held upright.
- // Rotate that source into portrait before object-fit so the preview is not center-cropped.
- const rotatePortrait=!landscapeMode&&video.videoWidth>video.videoHeight;
- if(rotatePortrait){
-  video.style.position='absolute';video.style.left='50%';video.style.top='50%';
-  video.style.width=frame.clientHeight+'px';video.style.height=frame.clientWidth+'px';
-  video.style.objectFit='cover';
-  video.style.transform='translate(-50%,-50%) rotate(90deg)'+(facing==='user'?' scaleX(-1)':'');
- }else{
-  video.style.position='';video.style.left='';video.style.top='';
-  video.style.width='100%';video.style.height='100%';
-  video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
- }
+ // Keep Safari's native camera orientation; do not rotate portrait preview.
+ video.style.position='';
+ video.style.left='';
+ video.style.top='';
+ video.style.width='100%';
+ video.style.height='100%';
+ video.style.transform=(facing==='user'?'scaleX(-1) ':'')+(!nativeZoom&&zoom>1?'scale('+zoom+')':'');
  $('landscapeShot').setAttribute('aria-pressed',String(landscapeMode));
 }
 function setRatio(value){
@@ -546,7 +540,7 @@ $('deletePhoto').onclick=async()=>{
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
 window.addEventListener('resize',()=>updatePreviewFrame());
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v82',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v83',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
  startCamera();
 </script></body></html>
