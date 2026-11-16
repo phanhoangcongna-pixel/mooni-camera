@@ -73,6 +73,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 </section>
 
 <nav class="filters" aria-label="Bộ lọc màu">
+<button class="filter" data-f="woodland" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#101612,#384239 55%,#a59b7c)"></div>WOODLAND</button>
 <button class="filter" data-f="duskmood" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#101a19,#46504b 55%,#a3b0b0)"></div>DUSK MOOD</button>
 <button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
 <button class="filter" data-f="street" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#172a2a,#8e7964)"></div>STREET</button>
@@ -126,6 +127,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 const $=id=>document.getElementById(id), video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
 let stream=null,facing='environment',filter='original',lastUrl=null,galleryIndex=0,galleryViewUrl=null,zoom=1,nativeZoom=false,zoomCaps=null,ratio='4:3',landscapeMode=false,torchOn=false,torchSupported=false,timerSeconds=0,galleryItems=[],exposureValue=0,exposureRange=null,focusTimer=null;
 const looks={
+ woodland:{css:'contrast(1.18) saturate(.78) brightness(.91) hue-rotate(-6deg)',grain:0,caption:'Woodland · xanh rừng olive trầm, bóng đen sâu hơi lạnh, da trung tính ấm và vùng nắng vàng dịu.'},
  duskmood:{css:'contrast(1.22) saturate(.78) brightness(.90) hue-rotate(-7deg)',grain:0,caption:'Dusk Mood · xanh rêu trầm, nước và trời ánh xanh lạnh, bóng tối sâu, màu dịu kiểu ảnh chiều muộn.'},
  street:{css:'contrast(1.18) saturate(.88) brightness(.94) sepia(.06)',grain:0,caption:'Street tone · đen sâu, màu trầm lạnh, da và ánh đèn ấm, nét rõ.'},
  forest:{css:'contrast(1.18) saturate(.92) brightness(1.035) hue-rotate(-7deg)',grain:0,caption:'Forest · xanh lá trầm, vùng sáng ngả cyan nhẹ, trắng sạch, tương phản sâu và chi tiết rõ.'},
@@ -518,7 +520,7 @@ $('deletePhoto').onclick=async()=>{
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
 window.addEventListener('resize',()=>updatePreviewFrame());
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v74',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v75',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
  startCamera();
 </script></body></html>
