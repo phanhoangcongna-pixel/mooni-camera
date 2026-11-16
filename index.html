@@ -152,8 +152,8 @@ const looks={
  japandream:{css:'contrast(1.045) saturate(.91) brightness(1.055) sepia(.075) hue-rotate(-4deg)',grain:1.1,caption:'Japan Dream · da hồng sáng dịu, xanh cây trầm lạnh, nâu đỏ ấm, glow mềm và chút chất digicam Nhật.'},
  lavender:{css:'contrast(.93) saturate(.82) brightness(1.055) sepia(.10) hue-rotate(-18deg)',grain:0,caption:'Lavender · tông pastel tím hồng nhẹ, da sáng mịn, xanh lạnh phấn, tương phản thấp và ánh sáng mơ màng.'},
 
- sepiasoft:{css:'grayscale(.72) sepia(.62) saturate(.72) contrast(1.10) brightness(.96)',grain:.75,caption:'Sepia Soft · đơn sắc nâu ấm, vùng sáng màu kem, bóng đổ nâu sâu, tương phản dịu như ảnh studio hoài cổ.'},
- sepiafilm:{css:'grayscale(.42) sepia(.52) saturate(.78) contrast(1.16) brightness(.91) hue-rotate(-7deg)',grain:.35,caption:'Sepia Film · nâu trầm kiểu ảnh film cũ, bóng chocolate, trung tính nâu hạt dẻ và vùng sáng be ấm — không ám vàng.'},
+ sepiasoft:{css:'grayscale(.28) sepia(.38) saturate(.88) contrast(1.08) brightness(1.01)',grain:.55,caption:'Sepia Soft · màu ấm nhẹ, giữ sắc da và màu gốc, vùng sáng kem và bóng đổ nâu dịu.'},
+ sepiafilm:{css:'grayscale(.18) sepia(.32) saturate(.94) contrast(1.10) brightness(1.015) hue-rotate(-5deg)',grain:.25,caption:'Sepia Film · tông nâu film nhẹ, vẫn giữ màu tự nhiên của da và cảnh, không phủ đơn sắc.'},
  leicanatural:{css:'contrast(1.10) saturate(.91) brightness(1.015) sepia(.035)',grain:0,caption:'Leica Natural inspired · màu chân thực, da ấm nhẹ, độ tương phản tinh gọn và chi tiết rõ.'},
  leicachrome:{css:'contrast(1.16) saturate(.83) brightness(.99) sepia(.055) hue-rotate(3deg)',grain:0,caption:'Leica Chrome inspired · màu trầm thanh lịch, xanh dịu, đỏ sâu và chất ảnh đường phố.'},
  leicavivid:{css:'contrast(1.16) saturate(1.24) brightness(1.015)',grain:0,caption:'Leica Vivid inspired · màu giàu sức sống, đỏ và xanh nổi bật, tương phản rõ.'},
@@ -442,24 +442,7 @@ async function captureNow(){
   }
   ctx.putImageData(im,0,0);
  }
- if(filter==='sepiafilm'){
-  // Brown duotone: map luminance to neutral chocolate shadows and soft beige highlights.
-  const im=ctx.getImageData(0,0,w,h),d=im.data;
-  for(let i=0;i<d.length;i+=4){
-   const y=(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/255;
-   const t=Math.max(0,Math.min(1,(y-.06)/.88));
-   let c;
-   if(t<.55){
-    const k=t/.55;
-    c=[34+(112-34)*k,26+(79-26)*k,23+(58-23)*k];
-   }else{
-    const k=(t-.55)/.45;
-    c=[112+(218-112)*k,79+(195-79)*k,58+(166-58)*k];
-   }
-   d[i]=c[0];d[i+1]=c[1];d[i+2]=c[2];
-  }
-  ctx.putImageData(im,0,0);
- }
+ // Sepia Film uses its CSS color grade above; do not remap the whole image to a brown duotone.
  // Apply the exposure slider as the final image operation so the saved photo
  // matches the brightness visible in the live preview for every preset.
  if(exposureValue!==0){
