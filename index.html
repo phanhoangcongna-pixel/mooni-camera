@@ -179,7 +179,7 @@ $('flashToggle').addEventListener('click',async()=>{
 });
 
 $('timerToggle').addEventListener('click',()=>{timerSeconds=timerSeconds===0?3:timerSeconds===3?10:0;$('timerToggle').textContent=timerSeconds?String(timerSeconds):'◷';$('timerToggle').setAttribute('aria-pressed',String(!!timerSeconds));say(timerSeconds?'Hẹn giờ '+timerSeconds+' giây':'Đã tắt hẹn giờ');});
-function applyLiveFilter(){const exposure=Math.pow(2,exposureValue/2);video.style.filter=(looks[filter]?.css||'none')+' brightness('+exposure.toFixed(3)+')'}
+function applyLiveFilter(){const exposure=Math.pow(2,exposureValue/2);const css=looks[filter]?.css||'none';video.style.filter=(css==='none'?'':css+' ')+(exposureValue!==0?'brightness('+exposure.toFixed(3)+')':'');}
 function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===name)));applyLiveFilter();$('caption').textContent=looks[name].caption}
 
 document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.f)));
