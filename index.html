@@ -20,7 +20,7 @@ body{overscroll-behavior:none}
 header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:center;padding:0}
 .logo{font:500 16px Georgia,serif;letter-spacing:.42em;padding-left:.42em;color:#f4f1e9}
 .tag{display:none}
-.stage{position:relative;flex:1 1 0;width:100%;min-height:0;max-height:none;aspect-ratio:auto;margin:5px 0 8px;overflow:hidden;border-radius:24px;background:#171614;box-shadow:0 8px 30px #0008;transition:width .18s,aspect-ratio .18s}
+.stage{position:relative;flex:1 1 0;width:100%;min-height:0;max-height:none;aspect-ratio:auto;margin:0 0 5px;overflow:hidden;border-radius:24px;background:#171614;box-shadow:0 8px 30px #0008;transition:width .18s,aspect-ratio .18s}
 .live-frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#000}
 .live-frame video{width:100%;height:100%;object-fit:cover;display:block}
 .live-frame video.selfie-preview{transform:scaleX(-1)}
@@ -37,8 +37,7 @@ header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content
 .ratios{display:flex;justify-content:center;gap:3px;padding:3px;background:#191917;border:1px solid #35342f;border-radius:24px;width:min(100%,250px);margin:0 auto}
 .ratio{flex:1;border:0;background:transparent;color:#99968f;border-radius:20px;padding:6px 11px;font-size:11px;letter-spacing:.02em}
 .ratio[aria-pressed=true]{background:#f1efe8;color:#171613;font-weight:650;box-shadow:0 1px 4px #0005}.landscape-shot{display:block;margin:5px auto 0;padding:6px 12px;border:1px solid #555149;border-radius:22px;background:#191917;color:#e9e6df;font-size:9px;letter-spacing:.1em}.landscape-shot[aria-pressed=true]{background:#f1efe8;color:#171613}
-.filters{display:flex;flex:0 0 auto;gap:8px;overflow-x:auto;padding:5px 1px 5px;scrollbar-width:none;scroll-snap-type:x proximity}
-.filter-categories{gap:22px}
+.filters{display:flex;flex:0 0 auto;gap:8px;overflow-x:auto;padding:3px 1px 3px;scrollbar-width:none;scroll-snap-type:x proximity}
 .filters::-webkit-scrollbar{display:none}
 .filter{flex:0 0 57px;border:0;background:none;color:#85827b;font-size:8px;letter-spacing:.07em;padding:0;scroll-snap-align:start}
 .swatch{height:32px;border-radius:9px;margin-bottom:5px;border:2px solid transparent;box-shadow:inset 0 0 0 1px #ffffff35}
@@ -502,7 +501,7 @@ $('deletePhoto').onclick=async()=>{
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
 window.addEventListener('resize',()=>updatePreviewFrame());
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v69',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
  startCamera();
 </script></body></html>
