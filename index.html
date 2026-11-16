@@ -476,7 +476,7 @@ async function captureNow(){
  },'image/jpeg',1)
 };
 $('last').onclick=async()=>{await refreshGallery();$('gallery').classList.add('open')};
-$('closeGallery').onclick=async()=>{$('gallery').classList.remove('open');$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid';if(galleryViewUrl){URL.revokeObjectURL(galleryViewUrl);galleryViewUrl=null}await startCamera();};
+$('closeGallery').onclick=async()=>{$('gallery').classList.remove('open');$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid';if(galleryViewUrl){URL.revokeObjectURL(galleryViewUrl);galleryViewUrl=null}if(stream&&video.srcObject===stream){try{await video.play()}catch(e){}updateZoom()}else{await startCamera()}};
 $('galleryBack').onclick=()=>{$('galleryPreview').style.display='none';$('galleryGrid').style.display='grid';if(galleryViewUrl){URL.revokeObjectURL(galleryViewUrl);galleryViewUrl=null}};
 async function openGalleryItem(item){
  galleryIndex=galleryItems.findIndex(x=>x.id===item.id);
@@ -527,7 +527,7 @@ $('deletePhoto').onclick=async()=>{
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
 window.addEventListener('resize',()=>updatePreviewFrame());
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v80',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v81',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
  startCamera();
 </script></body></html>
