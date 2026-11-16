@@ -97,6 +97,7 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <button class="filter" data-f="velvia" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#145b58,#e2a65f)"></div>VELVIA</button>
 <button class="filter" data-f="acros" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#171717,#d9d5ce)"></div>ACROS</button><button class="filter" data-f="japandream" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#304b42,#c58e86 55%,#f2dcca)"></div>JAPAN DREAM</button>
 <button class="filter" data-f="lavender" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#77738d,#c7b5ca 55%,#eee0e7)"></div>LAVENDER</button>
+<button class="filter" data-f="sepiafilm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#30231c,#89745e 55%,#e4d4bc)"></div>SEPIA FILM</button>
 <button class="filter" data-f="leicanatural" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#65705c,#d6c8aa)"></div>LEICA NATURAL</button>
 <button class="filter" data-f="leicachrome" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#354b4c,#c8b69a)"></div>LEICA CHROME</button>
 <button class="filter" data-f="leicavivid" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#145e61,#e4a75e)"></div>LEICA VIVID</button>
@@ -149,6 +150,7 @@ const looks={
  japandream:{css:'contrast(1.045) saturate(.91) brightness(1.055) sepia(.075) hue-rotate(-4deg)',grain:1.1,caption:'Japan Dream · da hồng sáng dịu, xanh cây trầm lạnh, nâu đỏ ấm, glow mềm và chút chất digicam Nhật.'},
  lavender:{css:'contrast(.93) saturate(.82) brightness(1.055) sepia(.10) hue-rotate(-18deg)',grain:0,caption:'Lavender · tông pastel tím hồng nhẹ, da sáng mịn, xanh lạnh phấn, tương phản thấp và ánh sáng mơ màng.'},
 
+ sepiafilm:{css:'grayscale(.72) sepia(.62) saturate(.72) contrast(1.10) brightness(.96)',grain:.75,caption:'Sepia Film · đơn sắc nâu ấm, vùng sáng màu kem, bóng đổ nâu sâu, tương phản dịu như ảnh studio hoài cổ.'},
  leicanatural:{css:'contrast(1.10) saturate(.91) brightness(1.015) sepia(.035)',grain:0,caption:'Leica Natural inspired · màu chân thực, da ấm nhẹ, độ tương phản tinh gọn và chi tiết rõ.'},
  leicachrome:{css:'contrast(1.16) saturate(.83) brightness(.99) sepia(.055) hue-rotate(3deg)',grain:0,caption:'Leica Chrome inspired · màu trầm thanh lịch, xanh dịu, đỏ sâu và chất ảnh đường phố.'},
  leicavivid:{css:'contrast(1.16) saturate(1.24) brightness(1.015)',grain:0,caption:'Leica Vivid inspired · màu giàu sức sống, đỏ và xanh nổi bật, tương phản rõ.'},
