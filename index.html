@@ -189,9 +189,14 @@ function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b
 document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.f)));
 async function startCamera(){
  if(!navigator.mediaDevices?.getUserMedia){say('Camera cần trang HTTPS. Hãy mở bằng Safari trên iPhone.');return}
+ // Always clear any previous digital/hardware zoom before opening a new camera stream.
+ zoom=1;nativeZoom=false;zoomCaps=null;
+ video.style.transform=facing==='user'?'scaleX(-1)':'';
+ video.style.transformOrigin='center center';
  say('Đang yêu cầu quyền camera…');
  try{
-  if(stream)stream.getTracks().forEach(t=>t.stop());
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  video.srcObject=null;
   // Ask for the highest common 4K-class frame in the current orientation.
   // The browser/device may negotiate a lower resolution if its camera API limits it.
   const isLandscape=landscapeMode&&facing==='user';
@@ -225,8 +230,8 @@ async function startCamera(){
   applyExposure(0);
   zoomCaps=caps.zoom||null;
   nativeZoom=!!(zoomCaps&&typeof zoomCaps.max==='number'&&typeof zoomCaps.min==='number'&&zoomCaps.max>zoomCaps.min);
-  zoom=landscapeMode&&facing==='user'&&nativeZoom&&zoomCaps.min<1?zoomCaps.min:1;
-  if(nativeZoom){try{await track.applyConstraints({advanced:[{zoom:Math.min(zoomCaps.max,Math.max(zoomCaps.min,zoom))}]})}catch(e){nativeZoom=false;zoom=1}}
+  zoom=Math.min(zoomCaps?.max||1,Math.max(zoomCaps?.min||1,1));
+  if(nativeZoom){try{await track.applyConstraints({advanced:[{zoom:zoom}]})}catch(e){nativeZoom=false;zoom=1;video.style.transform=facing==='user'?'scaleX(-1)':''}}
   updateZoom();
   torchSupported=!!caps.torch;torchOn=false;
   $('flashToggle').setAttribute('aria-pressed','false');
@@ -520,7 +525,7 @@ $('deletePhoto').onclick=async()=>{
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
 window.addEventListener('resize',()=>updatePreviewFrame());
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v78',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v79',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
  startCamera();
 </script></body></html>
