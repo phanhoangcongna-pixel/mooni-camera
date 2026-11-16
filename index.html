@@ -229,9 +229,11 @@ async function startCamera(){
   exposureValue=0;
   applyExposure(0);
   zoomCaps=caps.zoom||null;
-  nativeZoom=!!(zoomCaps&&typeof zoomCaps.max==='number'&&typeof zoomCaps.min==='number'&&zoomCaps.max>zoomCaps.min);
-  zoom=Math.min(zoomCaps?.max||1,Math.max(zoomCaps?.min||1,1));
-  if(nativeZoom){try{await track.applyConstraints({advanced:[{zoom:zoom}]})}catch(e){nativeZoom=false;zoom=1;video.style.transform=facing==='user'?'scaleX(-1)':''}}
+  // Only use hardware zoom when the camera explicitly supports a true 1.0x baseline.
+  // Some iPhone/Safari tracks report min > 1; clamping 1 to that minimum silently zooms in.
+  nativeZoom=!!(zoomCaps&&typeof zoomCaps.max==='number'&&typeof zoomCaps.min==='number'&&zoomCaps.min<=1&&zoomCaps.max>1);
+  zoom=1;
+  if(nativeZoom){try{await track.applyConstraints({advanced:[{zoom:1}]})}catch(e){nativeZoom=false;zoom=1;}}
   updateZoom();
   torchSupported=!!caps.torch;torchOn=false;
   $('flashToggle').setAttribute('aria-pressed','false');
@@ -525,7 +527,7 @@ $('deletePhoto').onclick=async()=>{
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
 window.addEventListener('resize',()=>updatePreviewFrame());
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v79',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v80',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
  startCamera();
 </script></body></html>
