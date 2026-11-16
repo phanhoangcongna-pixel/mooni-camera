@@ -43,6 +43,12 @@ header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content
 .filter-category[aria-pressed=true]{color:#f5f2ec;font-weight:650}
 .filter-category[aria-pressed=true]:after{content:"";position:absolute;left:25%;right:25%;bottom:1px;height:2px;border-radius:2px;background:#e9e5dc}
 .filters{display:flex;flex:0 0 auto;gap:8px;overflow-x:auto;padding:5px 1px 5px;scrollbar-width:none;scroll-snap-type:x proximity}
+.filter-wrap{position:relative;flex:0 0 57px;width:57px}
+.filter-wrap[hidden]{display:none}
+.filter-wrap .filter{width:100%;display:block}
+.favorite-toggle{position:absolute;right:1px;top:-5px;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:#171614d9;color:#e8dfc9;font-size:15px;line-height:20px;z-index:2}
+.favorite-toggle[aria-pressed=true]{color:#f3d17a}
+.filter-categories{gap:22px}
 .filters::-webkit-scrollbar{display:none}
 .filter{flex:0 0 57px;border:0;background:none;color:#85827b;font-size:8px;letter-spacing:.07em;padding:0;scroll-snap-align:start}
 .swatch{height:32px;border-radius:9px;margin-bottom:5px;border:2px solid transparent;box-shadow:inset 0 0 0 1px #ffffff35}
@@ -77,45 +83,45 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 <div class="placeholder" id="placeholder">MOONI<br><small>Đang mở camera…</small></div><div class="focus-ring" id="focusRing"></div><div class="stage-meta"><div class="zoom-control"><button id="zoomOut" aria-label="Thu nhỏ">−</button><button id="zoomReset" aria-label="Mức zoom hiện tại">1.0×</button><button id="zoomIn" aria-label="Phóng to">+</button></div></div>
 </section>
 <nav class="filter-categories" aria-label="Danh mục màu">
-<button class="filter-category" data-category="favorites" aria-pressed="false">Yêu thích</button>
-<button class="filter-category" data-category="featured" aria-pressed="true">Nổi bật</button>
-<button class="filter-category" data-category="new" aria-pressed="false">Mới</button>
-<button class="filter-category" data-category="basic" aria-pressed="false">Cơ bản</button>
-<button class="filter-category" data-category="flash" aria-pressed="false">Đèn flash</button>
+<button class="filter-category" data-category="favorites" aria-pressed="true">Yêu thích</button>
+<button class="filter-category" data-category="film" aria-pressed="false">Film</button>
+<button class="filter-category" data-category="natural" aria-pressed="false">Tự nhiên</button>
+<button class="filter-category" data-category="color" aria-pressed="false">Màu sắc</button>
+<button class="filter-category" data-category="bw" aria-pressed="false">Đen trắng</button>
 </nav>
 <nav class="filters" aria-label="Bộ lọc màu">
-<button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button>
-<button class="filter" data-f="street" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#172a2a,#8e7964)"></div>STREET</button>
-<button class="filter" data-f="streetbeauty" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#182a2a,#b58d79)"></div>STREET BEAUTY</button>
-<button class="filter" data-f="forest" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#172b27,#91b5b0 55%,#e2e4d5)"></div>FOREST</button>
-<button class="filter" data-f="forestfair" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#18332c,#b5c9b5 55%,#f1e9dc)"></div>FOREST FAIR</button>
-<button class="filter" data-f="cafe" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#100e0c,#795333 58%,#d8b77c)"></div>CAFE</button>
-<button class="filter" data-f="coast" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#168b9b,#c1d2bb)"></div>COAST</button>
-<button class="filter" data-f="seafilm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#72b9cc,#2d9eaa 55%,#e5d9bc)"></div>SEA FILM</button>
-<button class="filter" data-f="sunny" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#b98558,#ead6ae)"></div>SUNNY</button>
-<button class="filter" data-f="green" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#304c36,#aab58b)"></div>GREEN</button>
-<button class="filter" data-f="flash" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#79583e,#e5c69c)"></div>FLASH</button>
-<button class="filter" data-f="softfilm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#c2a990,#e9ddcc)"></div>SOFT FILM</button>
-<button class="filter" data-f="clear" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#d7d8ce,#9eb5ad)"></div>CLEAR</button>
-<button class="filter" data-f="retro" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#a97851,#e2c69c)"></div>RETRO</button>
-<button class="filter" data-f="cool" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#668b9e,#d2d8d7)"></div>COOL</button>
-<button class="filter" data-f="peach" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#d99c8c,#f0d4c4)"></div>PEACH</button>
-<button class="filter" data-f="mono" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#333,#d8d4ce)"></div>MONO</button>
-<button class="filter" data-f="vivid" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#177b80,#e5b77c)"></div>VIVID</button>
-<button class="filter" data-f="classicchrome" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#344650,#b9a58a)"></div>CLASSIC CHROME</button>
-<button class="filter" data-f="eterna" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#46545a,#c4b6a0)"></div>ETERNA</button>
-<button class="filter" data-f="nostalgic" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#a46f50,#e5c69b)"></div>NOSTALGIC NEG.</button>
-<button class="filter" data-f="astia" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#b68e82,#ead9c7)"></div>ASTIA</button>
-<button class="filter" data-f="velvia" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#145b58,#e2a65f)"></div>VELVIA</button>
-<button class="filter" data-f="acros" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#171717,#d9d5ce)"></div>ACROS</button><button class="filter" data-f="japandream" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#304b42,#c58e86 55%,#f2dcca)"></div>JAPAN DREAM</button>
-<button class="filter" data-f="lavender" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#77738d,#c7b5ca 55%,#eee0e7)"></div>LAVENDER</button>
-<button class="filter" data-f="sepiasoft" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#454039,#9b8b77 55%,#e5d9c8)"></div>SEPIA SOFT</button>
-<button class="filter" data-f="sepiafilm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#30231c,#89745e 55%,#e4d4bc)"></div>SEPIA FILM</button>
-<button class="filter" data-f="leicanatural" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#65705c,#d6c8aa)"></div>LEICA NATURAL</button>
-<button class="filter" data-f="leicachrome" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#354b4c,#c8b69a)"></div>LEICA CHROME</button>
-<button class="filter" data-f="leicavivid" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#145e61,#e4a75e)"></div>LEICA VIVID</button>
-<button class="filter" data-f="leicawarm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#855b43,#ead0a9)"></div>LEICA WARM</button>
-<button class="filter" data-f="leicamono" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#171717,#d9d7d1)"></div>LEICA MONO</button>
+<div class="filter-wrap"><button class="filter" data-f="original" aria-pressed="true"><div class="swatch" style="background:linear-gradient(135deg,#c5c4b8,#eee5d9)"></div>ORIGINAL</button><button class="favorite-toggle" data-favorite="original" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="street" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#172a2a,#8e7964)"></div>STREET</button><button class="favorite-toggle" data-favorite="street" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="streetbeauty" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#182a2a,#b58d79)"></div>STREET BEAUTY</button><button class="favorite-toggle" data-favorite="streetbeauty" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="forest" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#172b27,#91b5b0 55%,#e2e4d5)"></div>FOREST</button><button class="favorite-toggle" data-favorite="forest" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="forestfair" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#18332c,#b5c9b5 55%,#f1e9dc)"></div>FOREST FAIR</button><button class="favorite-toggle" data-favorite="forestfair" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="cafe" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#100e0c,#795333 58%,#d8b77c)"></div>CAFE</button><button class="favorite-toggle" data-favorite="cafe" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="coast" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#168b9b,#c1d2bb)"></div>COAST</button><button class="favorite-toggle" data-favorite="coast" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="seafilm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#72b9cc,#2d9eaa 55%,#e5d9bc)"></div>SEA FILM</button><button class="favorite-toggle" data-favorite="seafilm" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="sunny" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#b98558,#ead6ae)"></div>SUNNY</button><button class="favorite-toggle" data-favorite="sunny" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="green" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#304c36,#aab58b)"></div>GREEN</button><button class="favorite-toggle" data-favorite="green" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="flash" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#79583e,#e5c69c)"></div>FLASH</button><button class="favorite-toggle" data-favorite="flash" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="softfilm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#c2a990,#e9ddcc)"></div>SOFT FILM</button><button class="favorite-toggle" data-favorite="softfilm" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="clear" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#d7d8ce,#9eb5ad)"></div>CLEAR</button><button class="favorite-toggle" data-favorite="clear" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="retro" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#a97851,#e2c69c)"></div>RETRO</button><button class="favorite-toggle" data-favorite="retro" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="cool" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#668b9e,#d2d8d7)"></div>COOL</button><button class="favorite-toggle" data-favorite="cool" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="peach" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#d99c8c,#f0d4c4)"></div>PEACH</button><button class="favorite-toggle" data-favorite="peach" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="mono" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#333,#d8d4ce)"></div>MONO</button><button class="favorite-toggle" data-favorite="mono" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="vivid" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#177b80,#e5b77c)"></div>VIVID</button><button class="favorite-toggle" data-favorite="vivid" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="classicchrome" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#344650,#b9a58a)"></div>CLASSIC CHROME</button><button class="favorite-toggle" data-favorite="classicchrome" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="eterna" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#46545a,#c4b6a0)"></div>ETERNA</button><button class="favorite-toggle" data-favorite="eterna" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="nostalgic" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#a46f50,#e5c69b)"></div>NOSTALGIC NEG.</button><button class="favorite-toggle" data-favorite="nostalgic" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="astia" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#b68e82,#ead9c7)"></div>ASTIA</button><button class="favorite-toggle" data-favorite="astia" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="velvia" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#145b58,#e2a65f)"></div>VELVIA</button><button class="favorite-toggle" data-favorite="velvia" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="acros" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#171717,#d9d5ce)"></div>ACROS</button><button class="favorite-toggle" data-favorite="acros" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div><div class="filter-wrap"><button class="filter" data-f="japandream" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#304b42,#c58e86 55%,#f2dcca)"></div>JAPAN DREAM</button><button class="favorite-toggle" data-favorite="japandream" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="lavender" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#77738d,#c7b5ca 55%,#eee0e7)"></div>LAVENDER</button><button class="favorite-toggle" data-favorite="lavender" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="sepiasoft" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#454039,#9b8b77 55%,#e5d9c8)"></div>SEPIA SOFT</button><button class="favorite-toggle" data-favorite="sepiasoft" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="sepiafilm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#30231c,#89745e 55%,#e4d4bc)"></div>SEPIA FILM</button><button class="favorite-toggle" data-favorite="sepiafilm" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="leicanatural" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#65705c,#d6c8aa)"></div>LEICA NATURAL</button><button class="favorite-toggle" data-favorite="leicanatural" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="leicachrome" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#354b4c,#c8b69a)"></div>LEICA CHROME</button><button class="favorite-toggle" data-favorite="leicachrome" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="leicavivid" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#145e61,#e4a75e)"></div>LEICA VIVID</button><button class="favorite-toggle" data-favorite="leicavivid" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="leicawarm" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#855b43,#ead0a9)"></div>LEICA WARM</button><button class="favorite-toggle" data-favorite="leicawarm" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
+<div class="filter-wrap"><button class="filter" data-f="leicamono" aria-pressed="false"><div class="swatch" style="background:linear-gradient(135deg,#171717,#d9d7d1)"></div>LEICA MONO</button><button class="favorite-toggle" data-favorite="leicamono" aria-label="Thêm vào yêu thích" aria-pressed="false">☆</button></div>
 </nav>
 <div class="ratio-wrap"><div class="ratio-label">ASPECT RATIO</div><div class="ratios" aria-label="Tỷ lệ ảnh">
  <button class="ratio" data-ratio="4:3" aria-pressed="true">4:3</button>
@@ -194,20 +200,40 @@ function applyLiveFilter(){const exposure=Math.pow(2,exposureValue/2);video.styl
 function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===name)));applyLiveFilter();$('caption').textContent=looks[name].caption}
 
 const filterGroups={
- favorites:['forest','cafe','classicchrome','japandream','sepiasoft','sepiafilm'],
- featured:['street','forest','cafe','japandream','lavender','sepiasoft','sepiafilm','leicachrome','leicanatural'],
- new:['classicchrome','eterna','nostalgic','astia','velvia','acros','japandream','lavender','sepiasoft','sepiafilm','leicanatural','leicachrome','leicavivid','leicawarm','leicamono'],
- basic:['original','clear','cool','sunny','green','peach','mono','vivid','retro','softfilm'],
- flash:['flash','streetbeauty','street']
+ favorites:[],
+ film:['softfilm','retro','classicchrome','eterna','nostalgic','astia','sepiasoft','sepiafilm'],
+ natural:['original','clear','street','streetbeauty','forest','forestfair','leicanatural','leicachrome'],
+ color:['coast','seafilm','sunny','green','cool','peach','vivid','velvia','japandream','lavender','leicavivid','leicawarm'],
+ bw:['mono','acros','leicamono'],
 };
+let favoriteFilters=[];
+try{favoriteFilters=JSON.parse(localStorage.getItem('mooni-favorite-filters')||'[]')}catch(e){favoriteFilters=[]}
+function syncFavoriteButtons(){
+ document.querySelectorAll('.favorite-toggle').forEach(b=>{
+  const active=favoriteFilters.includes(b.dataset.favorite);
+  b.textContent=active?'★':'☆';b.setAttribute('aria-pressed',String(active));
+  b.setAttribute('aria-label',active?'Bỏ khỏi yêu thích':'Thêm vào yêu thích');
+ });
+}
+function toggleFavorite(name){
+ favoriteFilters=favoriteFilters.includes(name)?favoriteFilters.filter(x=>x!==name):[...favoriteFilters,name];
+ try{localStorage.setItem('mooni-favorite-filters',JSON.stringify(favoriteFilters))}catch(e){}
+ syncFavoriteButtons();
+ if(document.querySelector('.filter-category[aria-pressed="true"]')?.dataset.category==='favorites')showFilterCategory('favorites');
+}
 function showFilterCategory(category){
  document.querySelectorAll('.filter-category').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.category===category)));
- const visible=filterGroups[category]||filterGroups.featured;
- document.querySelectorAll('.filter').forEach(b=>{b.hidden=!visible.includes(b.dataset.f)});
+ const visible=category==='favorites'?favoriteFilters:(filterGroups[category]||[]);
+ document.querySelectorAll('.filter-wrap').forEach(w=>{w.hidden=!visible.includes(w.querySelector('.filter')?.dataset.f)});
+ const row=document.querySelector('.filters');if(row)row.scrollLeft=0;
+}
+document.querySelectorAll('.filter').forEach(b=>{b.hidden=!visible.includes(b.dataset.f)});
  const active=document.querySelector('.filter[aria-pressed="true"]:not([hidden])');
  if(!active&&visible.length){const first=document.querySelector('.filter[data-f="'+visible[0]+'"]');if(first)first.scrollIntoView({block:'nearest',inline:'start'})}
 }
 document.querySelectorAll('.filter-category').forEach(b=>b.addEventListener('click',()=>showFilterCategory(b.dataset.category)));
+document.querySelectorAll('.favorite-toggle').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();toggleFavorite(b.dataset.favorite)}));
+syncFavoriteButtons();
 showFilterCategory('featured');
 document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.f)));
 async function startCamera(){
