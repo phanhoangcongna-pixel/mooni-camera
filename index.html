@@ -200,11 +200,17 @@ async function startCamera(){
   // Ask for the highest common 4K-class frame in the current orientation.
   // The browser/device may negotiate a lower resolution if its camera API limits it.
   const isLandscape=landscapeMode&&facing==='user';
+  // Match camera constraints to the selected frame, not a fixed 9:16 request.
+  // Request portrait-native dimensions for the normal camera modes so Safari
+  // does not reopen a 16:9 landscape stream and crop it into a tight portrait.
+  const portraitSize=ratio==='4:3'?{width:1440,height:1920,aspect:3/4}
+   :ratio==='1:1'?{width:1440,height:1440,aspect:1}
+   :{width:1080,height:1920,aspect:9/16};
   const request={audio:false,video:{
    facingMode:{ideal:facing},
-   width:{ideal:isLandscape?3840:2160},
-   height:{ideal:isLandscape?2160:3840},
-   aspectRatio:{ideal:isLandscape?16/9:9/16},
+   width:{ideal:isLandscape?3840:portraitSize.width},
+   height:{ideal:isLandscape?2160:portraitSize.height},
+   aspectRatio:{ideal:isLandscape?16/9:portraitSize.aspect},
    frameRate:{ideal:30,max:60}
   }};
   stream=await navigator.mediaDevices.getUserMedia(request);
@@ -540,7 +546,7 @@ $('deletePhoto').onclick=async()=>{
 async function refreshGallery(){const db=await openGalleryDB();const items=await new Promise((resolve,reject)=>{const req=db.transaction('photos','readonly').objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.sort((a,b)=>b.id-a.id));req.onerror=()=>reject(req.error)});db.close();galleryItems=items;const latest=$('albumLatest');if(items.length){latest.src=URL.createObjectURL(items[0].blob);latest.hidden=false}else{latest.hidden=true}const grid=$('galleryGrid');grid.innerHTML='';items.forEach(item=>{const img=document.createElement('img');img.className='gallery-thumb';img.src=URL.createObjectURL(item.blob);img.alt='Ảnh MOONI';img.onclick=()=>openGalleryItem(item);grid.appendChild(img)});$('galleryEmpty').style.display=items.length?'none':'block';grid.style.display=items.length?'grid':'none'}
 setRatio('4:3');
 window.addEventListener('resize',()=>updatePreviewFrame());
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v83',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js?v=mooni-v84',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{});
  // Request camera as soon as the app opens. Safari still asks the user to grant permission.
  startCamera();
 </script></body></html>
