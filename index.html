@@ -194,7 +194,7 @@ $('flashToggle').addEventListener('click',async()=>{
  if(ok)say(next?'Đèn sáng liên tục':'Đèn đã tắt');
  else say('Thiết bị hoặc Safari không hỗ trợ bật đèn trong MOONI');
 });
-$('filterToggle').addEventListener('click',()=>{const f=$('filterToggle');const nav=document.querySelector('.filters');nav.style.display=nav.style.display==='none'?'flex':'none';f.setAttribute('aria-pressed',String(nav.style.display==='none'));});
+
 $('timerToggle').addEventListener('click',()=>{timerSeconds=timerSeconds===0?3:timerSeconds===3?10:0;$('timerToggle').textContent=timerSeconds?String(timerSeconds):'◷';$('timerToggle').setAttribute('aria-pressed',String(!!timerSeconds));say(timerSeconds?'Hẹn giờ '+timerSeconds+' giây':'Đã tắt hẹn giờ');});
 function applyLiveFilter(){const exposure=Math.pow(2,exposureValue/2);video.style.filter=(looks[filter]?.css||'none')+' brightness('+exposure.toFixed(3)+')'}
 function choose(name){filter=name;document.querySelectorAll('.filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===name)));applyLiveFilter();$('caption').textContent=looks[name].caption}
