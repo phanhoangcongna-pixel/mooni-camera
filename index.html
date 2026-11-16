@@ -20,7 +20,7 @@ body{overscroll-behavior:none}
 header{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:center;padding:0}
 .logo{font:500 16px Georgia,serif;letter-spacing:.42em;padding-left:.42em;color:#f4f1e9}
 .tag{display:none}
-.stage{position:relative;flex:1 1 0;width:100%;min-height:0;max-height:none;aspect-ratio:auto;margin:4px 0 8px;overflow:hidden;border-radius:24px;background:#171614;box-shadow:0 8px 30px #0008;transition:width .18s,aspect-ratio .18s}
+.stage{position:relative;flex:1 1 0;width:100%;min-height:0;max-height:none;aspect-ratio:auto;margin:10px 0 8px;overflow:hidden;border-radius:24px;background:#171614;box-shadow:0 8px 30px #0008;transition:width .18s,aspect-ratio .18s}
 .live-frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#000}
 .live-frame video{width:100%;height:100%;object-fit:cover;display:block}
 .live-frame video.selfie-preview{transform:scaleX(-1)}
@@ -128,8 +128,8 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
  <button class="ratio" data-ratio="16:9" aria-pressed="false">16:9</button>
  <button class="ratio" data-ratio="1:1" aria-pressed="false">1:1</button>
 </div><button class="landscape-shot" id="landscapeShot" aria-pressed="false">↔ &nbsp; CHỤP NGANG · CAMERA TRƯỚC</button></div>
-<div class="caption" id="caption">Màu gốc, giữ nguyên chất ảnh camera.</div>
-<div class="controls"><button class="round album-button" id="last" aria-label="Mở album ảnh" title="Album ảnh"><img id="albumLatest" alt="" hidden></button><button class="round" id="filterToggle" aria-label="Hiện bộ lọc" title="Bộ lọc">▢</button><button class="round" id="timerToggle" aria-label="Hẹn giờ" title="Hẹn giờ">◷</button><button class="round" id="flashToggle" aria-label="Bật đèn flash" aria-pressed="false" title="Flash">ϟ</button><button class="round" id="flip2" aria-label="Đổi camera" title="Đổi camera">⟳</button></div><div class="controls" style="padding-top:0"><button class="shutter" id="capture" aria-label="Chụp ảnh"></button></div>
+
+<div class="controls"><button class="round album-button" id="last" aria-label="Mở album ảnh" title="Album ảnh"><img id="albumLatest" alt="" hidden></button><button class="round" id="timerToggle" aria-label="Hẹn giờ" title="Hẹn giờ">◷</button><button class="round" id="flashToggle" aria-label="Bật đèn flash" aria-pressed="false" title="Flash">ϟ</button><button class="round" id="flip2" aria-label="Đổi camera" title="Đổi camera">⟳</button></div><div class="controls" style="padding-top:0"><button class="shutter" id="capture" aria-label="Chụp ảnh"></button></div>
 <div class="status" id="status">MOONI · bản thử nghiệm miễn phí</div>
 <section id="gallery" class="gallery" aria-label="Thư viện ảnh">
  <div class="gallery-head"><span>THƯ VIỆN MOONI</span><button id="closeGallery" class="gallery-close" aria-label="Đóng thư viện">×</button></div>
